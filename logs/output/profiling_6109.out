@@ -1,0 +1,111 @@
+mean of forward measurement times = 0.106312
+std. dev of forward measurement times = 0.147974
+mean of backward measurement times = 0.003425
+std. dev of backward measurement times = 0.001427
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                                   Name    Self CPU %      Self CPU   CPU total %     CPU total  CPU time avg     Self CUDA   Self CUDA %    CUDA total  CUDA time avg    # of Calls  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                          backward pass        28.65%      15.052ms        28.78%      15.117ms       5.039ms       0.000us         0.00%       3.000us       1.000us             3  
+                                       cudaLaunchKernel        10.70%       5.623ms        10.70%       5.623ms       3.248us     377.000us         8.07%     377.000us       0.218us          1731  
+                                              aten::mul         6.57%       3.450ms        10.85%       5.698ms      10.341us       1.150ms        24.60%       1.258ms       2.283us           551  
+                              Optimizer.step#AdamW.step         6.46%       3.395ms        25.53%      13.409ms       4.470ms       0.000us         0.00%       2.430ms     810.000us             3  
+                                           forward pass         3.77%       1.981ms        15.95%       8.380ms       2.793ms       0.000us         0.00%       1.003ms     334.333us             3  
+                                               aten::mm         3.47%       1.824ms         5.02%       2.636ms      22.530us       1.019ms        21.80%       1.099ms       9.393us           117  
+                                        aten::is_pinned         3.30%       1.731ms         3.32%       1.744ms     290.667us       0.000us         0.00%       0.000us       0.000us             6  
+                                              aten::add         2.81%       1.478ms         4.72%       2.479ms      10.329us     476.000us        10.18%     518.000us       2.158us           240  
+                                              aten::pow         1.89%     993.000us         2.78%       1.461ms      13.528us     194.000us         4.15%     237.000us       2.194us           108  
+                                             cudaMalloc         1.89%     991.000us         1.89%     991.000us     110.111us       0.000us         0.00%       0.000us       0.000us             9  
+                                              aten::div         1.83%     963.000us         2.63%       1.383ms      10.976us     266.000us         5.69%     293.000us       2.325us           126  
+                                              aten::bmm         1.14%     598.000us         1.50%     787.000us      21.861us     226.000us         4.84%     232.000us       6.444us            36  
+                                              aten::sum         1.09%     575.000us         1.51%     791.000us      12.556us     204.000us         4.36%     219.000us       3.476us            63  
+                                    aten::empty_strided         0.92%     485.000us         1.11%     582.000us       4.512us       0.000us         0.00%       0.000us       0.000us           129  
+                                            aten::fill_         0.87%     455.000us         1.74%     916.000us       6.496us     214.000us         4.58%     244.000us       1.730us           141  
+                                    cudaLaunchKernelExC         0.86%     452.000us         0.86%     452.000us       3.348us      11.000us         0.24%      11.000us       0.081us           135  
+                                            aten::copy_         0.83%     436.000us         1.74%     912.000us       9.806us     129.000us         2.76%     137.000us       1.473us            93  
+                                        aten::transpose         0.81%     426.000us         0.87%     459.000us       1.645us       0.000us         0.00%       0.000us       0.000us           279  
+                                       aten::zeros_like         0.71%     375.000us         3.56%       1.868ms      16.386us       0.000us         0.00%     181.000us       1.588us           114  
+                                             aten::sub_         0.70%     368.000us         1.35%     711.000us       6.237us     301.000us         6.44%     321.000us       2.816us           114  
+                                            aten::empty         0.70%     366.000us         0.70%     366.000us       3.812us       0.000us         0.00%       0.000us       0.000us            96  
+                                          aten::reshape         0.67%     351.000us         2.31%       1.211ms       5.850us       0.000us         0.00%      85.000us       0.411us           207  
+      autograd::engine::evaluate_function: MulBackward0         0.62%     324.000us         3.13%       1.646ms      39.190us       0.000us         0.00%     277.000us       6.595us            42  
+                                             aten::sqrt         0.61%     323.000us         1.02%     536.000us       9.404us     133.000us         2.85%     155.000us       2.719us            57  
+                                                aten::t         0.60%     313.000us         1.08%     568.000us       2.913us       0.000us         0.00%       0.000us       0.000us           195  
+                                       loss computation         0.58%     303.000us         1.46%     768.000us     256.000us       0.000us         0.00%      58.000us      19.333us             3  
+                                           aten::matmul         0.57%     299.000us         4.58%       2.406ms      47.176us       0.000us         0.00%     607.000us      11.902us            51  
+                                       aten::empty_like         0.55%     289.000us         1.94%       1.021ms       5.768us       0.000us         0.00%       0.000us       0.000us           177  
+                                        cudaMemcpyAsync         0.55%     288.000us         0.55%     288.000us       8.727us       7.000us         0.15%       7.000us       0.212us            33  
+                                            MmBackward0         0.50%     265.000us         3.89%       2.044ms      52.410us       0.000us         0.00%     603.000us      15.462us            39  
+                    Optimizer.zero_grad#AdamW.zero_grad         0.46%     244.000us         0.46%     244.000us      81.333us       0.000us         0.00%       0.000us       0.000us             3  
+                                            aten::zero_         0.46%     241.000us         2.04%       1.074ms       8.136us       0.000us         0.00%     234.000us       1.773us           132  
+                                             aten::mean         0.45%     238.000us         0.58%     303.000us      16.833us      64.000us         1.37%      66.000us       3.667us            18  
+                                             aten::add_         0.42%     221.000us         0.77%     403.000us       6.717us      65.000us         1.39%      84.000us       1.400us            60  
+                                              aten::neg         0.42%     220.000us         0.62%     327.000us       9.909us      33.000us         0.71%      43.000us       1.303us            33  
+                                  cudaFuncGetAttributes         0.42%     218.000us         0.42%     218.000us       2.202us      28.000us         0.60%      28.000us       0.283us            99  
+     autograd::engine::evaluate_function: ViewBackward0         0.37%     193.000us         1.48%     778.000us      11.275us       0.000us         0.00%      36.000us       0.522us            69  
+autograd::engine::evaluate_function: UnsafeViewBackw...         0.36%     190.000us         1.17%     612.000us       8.870us       0.000us         0.00%      25.000us       0.362us            69  
+                                           aten::expand         0.36%     188.000us         0.37%     195.000us       2.241us       0.000us         0.00%       0.000us       0.000us            87  
+                                            aten::clone         0.35%     185.000us         2.02%       1.059ms      17.650us       0.000us         0.00%     112.000us       1.867us            60  
+                                           aten::linear         0.33%     173.000us         3.29%       1.727ms      44.282us       0.000us         0.00%     464.000us      11.897us            39  
+autograd::engine::evaluate_function: torch::autograd...         0.33%     173.000us         0.62%     324.000us       5.684us       0.000us         0.00%       0.000us       0.000us            57  
+                                           aten::square         0.33%     173.000us         1.30%     683.000us      11.982us       0.000us         0.00%     135.000us       2.368us            57  
+       autograd::engine::evaluate_function: MmBackward0         0.32%     167.000us         4.24%       2.228ms      57.128us       0.000us         0.00%     611.000us      15.667us            39  
+                                              aten::max         0.30%     159.000us         0.38%     200.000us      22.222us      34.000us         0.73%      35.000us       3.889us             9  
+                                             aten::view         0.29%     152.000us         0.29%     152.000us       0.704us       0.000us         0.00%       0.000us       0.000us           216  
+                                            aten::rsqrt         0.28%     146.000us         0.37%     194.000us      12.933us      15.000us         0.32%      15.000us       1.000us            15  
+                                          ViewBackward0         0.27%     143.000us         0.85%     444.000us       6.435us       0.000us         0.00%      20.000us       0.290us            69  
+                                              aten::sub         0.27%     140.000us         0.36%     187.000us      12.467us      22.000us         0.47%      33.000us       2.200us            15  
+                                              aten::exp         0.26%     139.000us         0.37%     194.000us      12.933us      15.000us         0.32%      17.000us       1.133us            15  
+                                           MulBackward0         0.24%     124.000us         1.60%     838.000us      19.952us       0.000us         0.00%     126.000us       3.000us            42  
+      autograd::engine::evaluate_function: PowBackward0         0.23%     120.000us         1.59%     833.000us      55.533us       0.000us         0.00%      80.000us       5.333us            15  
+      autograd::engine::evaluate_function: SubBackward0         0.21%     109.000us         0.98%     515.000us      34.333us       0.000us         0.00%      62.000us       4.133us            15  
+                                     aten::masked_fill_         0.20%     106.000us         0.32%     168.000us      14.000us      22.000us         0.47%      27.000us       2.250us            12  
+                                         aten::scatter_         0.19%     102.000us         0.26%     136.000us      15.111us      16.000us         0.34%      17.000us       1.889us             9  
+      autograd::engine::evaluate_function: AddBackward0         0.19%     102.000us         0.26%     138.000us       3.833us       0.000us         0.00%      18.000us       0.500us            36  
+                                     aten::_unsafe_view         0.19%      99.000us         0.19%      99.000us       1.065us       0.000us         0.00%       0.000us       0.000us            93  
+                                      aten::masked_fill         0.18%      95.000us         1.04%     546.000us      45.500us       0.000us         0.00%      43.000us       3.583us            12  
+                                         optimizer pass         0.18%      94.000us        25.71%      13.503ms       4.501ms       0.000us         0.00%       2.430ms     810.000us             3  
+                                         aten::_to_copy         0.18%      93.000us         0.59%     311.000us      25.917us       0.000us         0.00%       6.000us       0.500us            12  
+                                     aten::index_select         0.18%      92.000us         0.41%     215.000us      35.833us      32.000us         0.68%      32.000us       5.333us             6  
+                                         RsqrtBackward0         0.17%      87.000us         1.17%     617.000us      41.133us       0.000us         0.00%      66.000us       4.400us            15  
+                                           BmmBackward0         0.16%      84.000us         1.20%     630.000us      52.500us       0.000us         0.00%     149.000us      12.417us            12  
+                                    UnsafeViewBackward0         0.16%      83.000us         0.80%     420.000us       6.087us       0.000us         0.00%      25.000us       0.362us            69  
+        autograd::engine::evaluate_function: TBackward0         0.15%      81.000us         0.47%     246.000us       6.308us       0.000us         0.00%       0.000us       0.000us            39  
+      autograd::engine::evaluate_function: DivBackward0         0.15%      80.000us         1.23%     647.000us      35.944us       0.000us         0.00%      90.000us       5.000us            18  
+                                        aten::embedding         0.14%      74.000us         0.57%     301.000us      50.167us       0.000us         0.00%      32.000us       5.333us             6  
+                                           DivBackward0         0.14%      74.000us         0.93%     486.000us      27.000us       0.000us         0.00%      71.000us       3.944us            18  
+                        torch::autograd::AccumulateGrad         0.13%      70.000us         0.29%     151.000us       2.649us       0.000us         0.00%       0.000us       0.000us            57  
+autograd::engine::evaluate_function: TransposeBackwa...         0.13%      69.000us         0.28%     147.000us       4.900us       0.000us         0.00%       0.000us       0.000us            30  
+                                               aten::to         0.13%      68.000us         0.63%     332.000us       2.767us       0.000us         0.00%       6.000us       0.050us           120  
+                                        GatherBackward0         0.13%      68.000us         0.33%     171.000us      57.000us       0.000us         0.00%       6.000us       2.000us             3  
+      autograd::engine::evaluate_function: MaxBackward0         0.13%      67.000us         0.92%     481.000us      53.444us       0.000us         0.00%      43.000us       4.778us             9  
+                                           PowBackward0         0.13%      67.000us         1.18%     620.000us      41.333us       0.000us         0.00%      55.000us       3.667us            15  
+autograd::engine::evaluate_function: EmbeddingBackwa...         0.13%      66.000us         0.54%     283.000us      47.167us       0.000us         0.00%      27.000us       4.500us             6  
+                                          MeanBackward1         0.12%      64.000us         0.49%     258.000us      17.200us       0.000us         0.00%      29.000us       1.933us            15  
+               aten::value_selecting_reduction_backward         0.12%      63.000us         0.61%     319.000us      35.444us       0.000us         0.00%      30.000us       3.333us             9  
+      autograd::engine::evaluate_function: BmmBackward0         0.12%      62.000us         1.32%     692.000us      57.667us       0.000us         0.00%     149.000us      12.417us            12  
+                                     aten::scatter_add_         0.12%      61.000us         0.14%      75.000us      25.000us       6.000us         0.13%       6.000us       2.000us             3  
+                                           aten::gather         0.11%      58.000us         0.14%      71.000us      23.667us       6.000us         0.13%       6.000us       2.000us             3  
+                                            aten::zeros         0.11%      58.000us         0.45%     236.000us      15.733us       0.000us         0.00%      15.000us       1.000us            15  
+                                      aten::_pin_memory         0.11%      57.000us         0.18%      92.000us      15.333us       0.000us         0.00%       0.000us       0.000us             6  
+                                       aten::as_strided         0.11%      56.000us         0.11%      56.000us       0.134us       0.000us         0.00%       0.000us       0.000us           417  
+    autograd::engine::evaluate_function: RsqrtBackward0         0.11%      56.000us         1.28%     673.000us      44.867us       0.000us         0.00%      66.000us       4.400us            15  
+                                           aten::detach         0.10%      55.000us         0.15%      79.000us       1.386us       0.000us         0.00%       0.000us       0.000us            57  
+                                              aten::erf         0.10%      54.000us         0.15%      77.000us      12.833us       6.000us         0.13%       6.000us       1.000us             6  
+                                             aten::triu         0.10%      53.000us         0.14%      76.000us      12.667us       8.000us         0.17%       8.000us       1.333us             6  
+autograd::engine::evaluate_function: ExpandBackward0...         0.10%      53.000us         0.10%      53.000us       2.208us       0.000us         0.00%       0.000us       0.000us            24  
+    autograd::engine::evaluate_function: CloneBackward0         0.10%      50.000us         0.10%      50.000us       2.083us       0.000us         0.00%       0.000us       0.000us            24  
+                         aten::embedding_dense_backward         0.09%      47.000us         0.30%     157.000us      26.167us      12.000us         0.26%      22.000us       3.667us             6  
+     autograd::engine::evaluate_function: MeanBackward0         0.09%      46.000us         0.37%     195.000us      65.000us       0.000us         0.00%       3.000us       1.000us             3  
+                                             aten::item         0.09%      45.000us         0.09%      49.000us       2.042us       0.000us         0.00%       0.000us       0.000us            24  
+      autograd::engine::evaluate_function: SumBackward1         0.08%      44.000us         0.24%     126.000us      14.000us       0.000us         0.00%      12.000us       1.333us             9  
+                                          aten::resize_         0.08%      40.000us         0.08%      40.000us       4.444us       0.000us         0.00%       0.000us       0.000us             9  
+                                             TBackward0         0.08%      40.000us         0.26%     135.000us       3.462us       0.000us         0.00%       0.000us       0.000us            39  
+                                           aten::select         0.07%      39.000us         0.08%      43.000us       3.583us       0.000us         0.00%       0.000us       0.000us            12  
+                                           SubBackward0         0.07%      39.000us         0.34%     179.000us      11.933us       0.000us         0.00%      22.000us       1.467us            15  
+                                           ErfBackward0         0.07%      38.000us         0.70%     368.000us      61.333us       0.000us         0.00%      36.000us       6.000us             6  
+                                           aten::arange         0.07%      37.000us         0.24%     127.000us      21.167us       3.000us         0.06%       6.000us       1.000us             6  
+                                          aten::randint         0.06%      34.000us         0.13%      66.000us      22.000us       0.000us         0.00%       0.000us       0.000us             3  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+Self CPU time total: 52.529ms
+Self CUDA time total: 4.674ms
+

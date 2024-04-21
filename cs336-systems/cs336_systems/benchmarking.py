@@ -59,7 +59,7 @@ def profiling(model, tokens, optimizer, args):
             prof.step()
     
     prof.export_stacks('lm_profiler_stacks.txt', 'self_cuda_time_total')
-    print(prof.key_averages().table(sort_by='cpu_time_total', row_limit=50))
+    print(prof.key_averages().table(sort_by='self_cpu_time_total', row_limit=100))
 
 
 def end_to_end_benchmarking(model, tokens, args):
