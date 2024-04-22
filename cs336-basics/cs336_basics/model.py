@@ -94,6 +94,7 @@ class BasicsTransformerLM(nn.Module):
         d_ff: int,
         attn_pdrop: Optional[float] = None,
         residual_pdrop: Optional[float] = None,
+        norm_layer: str = 'rms'
     ):
         # Store the model configuration for serialization / deserialization
         self.config = {
@@ -114,11 +115,15 @@ class BasicsTransformerLM(nn.Module):
                     d_ff=d_ff,
                     attn_pdrop=attn_pdrop,
                     residual_pdrop=residual_pdrop,
+                    norm_layer=norm_layer
                 )
                 for _ in range(num_layers)
             ]
         )
-        self.ln_final = RMSNorm(d_model)
+        if(norm_layer == 'rms'):
+            self.ln_final = RMSNorm(d_model)
+        else: 
+            self.ln_final = nn.LayerNorm(d_model)
         self.lm_head = nn.Linear(d_model, vocab_size, bias=False)
         # Tie the weights, since the paper mentions that "we share the same weight
         # matrix between the two embedding layers and the pre-softmax linear transformation"
@@ -287,6 +292,7 @@ class TransformerBlock(nn.Module):
         d_ff: int,
         attn_pdrop: Optional[float] = None,
         residual_pdrop: Optional[float] = None,
+        norm_layer: str = 'rms'
     ):
         super().__init__()
         self.attn = CausalMultiHeadSelfAttention(
@@ -294,9 +300,15 @@ class TransformerBlock(nn.Module):
             num_heads=num_heads,
             attn_pdrop=attn_pdrop,
         )
-        self.ln1 = RMSNorm(d_model)
+        if(norm_layer == 'rms'):
+            self.ln1 = RMSNorm(d_model)
+        else: 
+            self.ln1 = nn.LayerNorm(d_model)
         self.ffn = FFN(d_model=d_model, d_ff=d_ff)
-        self.ln2 = RMSNorm(d_model)
+        if(norm_layer == 'rms'):
+            self.ln2 = RMSNorm(d_model)
+        else:
+            self.ln2 = nn.LayerNorm(d_model)
         self.residual_pdrop = residual_pdrop
 
     def forward(self, x: torch.Tensor):
