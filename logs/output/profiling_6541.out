@@ -1,0 +1,22 @@
+measurement steps = 1000
+
+Hidden size = 1024
+rms norm, Mean time: 0.000570, std_dev : 0.000005
+layer norm, Mean time: 0.000193, std_dev : 0.000001
+ratio of mean times = 2.957789
+
+Hidden size = 2048
+rms norm, Mean time: 0.001105, std_dev : 0.000004
+layer norm, Mean time: 0.000325, std_dev : 0.000001
+ratio of mean times = 3.402536
+
+Hidden size = 4096
+rms norm, Mean time: 0.002158, std_dev : 0.000005
+layer norm, Mean time: 0.000804, std_dev : 0.000001
+ratio of mean times = 2.685027
+
+Hidden size = 8192
+rms norm, Mean time: 0.004261, std_dev : 0.000006
+layer norm, Mean time: 0.001649, std_dev : 0.000001
+ratio of mean times = 2.583247
+

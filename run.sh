@@ -7,7 +7,9 @@
 #SBATCH --output=profiling_%j.out
 #SBATCH --error=profiling_%j.err
 #SBATCH --gpus=1
-python3 cs336-systems/cs336_systems/benchmarking.py --context_length=10 --vocab_size=10 --batch_size=2 --num_heads=2 --num_layers=2 --warmup_steps=0 --measurement_steps=3 --pass_type='both' --profiler=True
+#SBATCH --mem=200G
+#python3 cs336-systems/cs336_systems/benchmarking.py --context_length=128 --vocab_size=10000 --batch_size=16 --num_heads=12 --num_layers=12 --warmup_steps=1 --measurement_steps=5 --pass_type='both' --norm_layer='ln'
+python3 cs336-systems/cs336_systems/rms_layernorm.py
 mkdir -p logs/output
 mkdir -p logs/error
 mv profiling*.out logs/output/.

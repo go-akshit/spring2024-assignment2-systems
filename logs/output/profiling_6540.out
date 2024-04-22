@@ -1,0 +1,8 @@
+Hidden_size = 1024, Mean time for 1000 iterations for rms_norm is 0.000571
+Hidden_size = 1024, Mean time for 1000 iterations for layer_norm is 0.000192
+Hidden_size = 2048, Mean time for 1000 iterations for rms_norm is 0.001105
+Hidden_size = 2048, Mean time for 1000 iterations for layer_norm is 0.000324
+Hidden_size = 4096, Mean time for 1000 iterations for rms_norm is 0.002159
+Hidden_size = 4096, Mean time for 1000 iterations for layer_norm is 0.000804
+Hidden_size = 8192, Mean time for 1000 iterations for rms_norm is 0.004262
+Hidden_size = 8192, Mean time for 1000 iterations for layer_norm is 0.001649

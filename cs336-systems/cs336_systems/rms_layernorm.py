@@ -36,7 +36,8 @@ def time_rms(x, w, args):
         times.append(end_time-start_time)
    
     mean_time = np.mean(times)
-    return mean_time
+    std_dev = np.std(times)
+    return mean_time, std_dev
 
 
 def time_layernorm(x, w, b, args):
@@ -61,21 +62,23 @@ def time_layernorm(x, w, b, args):
         times.append(end_time-start_time)
     
     mean_time = np.mean(times)
-    return mean_time
+    std_dev = np.std(times)
+    return mean_time, std_dev
 
 
 def main():
-    import pdb; pdb.set_trace()
     args = get_args()
+    print(f'measurement steps = {args.measurement_steps}\n')
     for i in args.hidden_dim_list:
         input = torch.randn(args.batch_size, i).to(args.device)
         weight_rms = torch.randn(i).to(args.device)
         weight_layer_norm = torch.randn(i).to(args.device)
         bias_layer_norm = torch.randn(i).to(args.device)
-        rms_time = time_rms(input, weight_rms, args)
-        layernorm_time = time_layernorm(input, weight_layer_norm, bias_layer_norm, args)
-        print(f'Mean time for {args.measurement_steps} iterations for rms_norm is {rms_time:0.6f}')
-        print(f'Mean time for {args.measurement_steps} iterations for layer_norm is {layernorm_time:0.6f}')
-
+        rms_time, rms_std_dev = time_rms(input, weight_rms, args)
+        layernorm_time, layernorm_std_dev = time_layernorm(input, weight_layer_norm, bias_layer_norm, args)
+        print(f'Hidden size = {i}')
+        print(f'rms norm, Mean time: {rms_time:0.6f}, std_dev : {rms_std_dev:0.6f}')
+        print(f'layer norm, Mean time: {layernorm_time:0.6f}, std_dev : {layernorm_std_dev:0.6f}')
+        print(f'ratio of mean times = {rms_time/layernorm_time :0.6f}\n')
 if __name__=='__main__':
     main()

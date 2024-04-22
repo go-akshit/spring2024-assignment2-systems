@@ -112,7 +112,7 @@ def main():
                                 attn_pdrop= None,
                                 residual_pdrop=None, 
                                 norm_layer=args.norm_layer).to(device)
-    tokens = np.random.randint(0, args.vocab_size, 5*args.context_length)
+    tokens = np.random.randint(0, 100, 5*args.context_length)
     
     end_to_end_benchmarking(model, tokens, args)
     if(args.profiler):
