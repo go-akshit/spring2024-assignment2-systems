@@ -23,7 +23,7 @@ def get_args():
     parser.add_argument("--num_layers", type=int, default=12, help="num_layers for the model, default=small i.e. 12")
     parser.add_argument("--num_heads", type=int, default=12, help="num_heads for the model, default=small i.e. 12")
     parser.add_argument("--device", type=str, default='cuda', choices=['cuda', 'cpu'], help="device, default=cuda")
-    parser.add_argument("--profiler", type=bool, default='false', help="If want to use pytorch profiler, default= false")
+    parser.add_argument("--profiler", action="store_true", default=False, help="If want to use pytorch profiler, default= false")
     parser.add_argument("--norm_layer", type=str, default='rms', choices=['rms', 'ln'], help="type of norm layer")
     args = parser.parse_args()
     return args
@@ -115,7 +115,6 @@ def main():
     tokens = np.random.randint(0, args.vocab_size, 5*args.context_length)
     
     end_to_end_benchmarking(model, tokens, args)
-
     if(args.profiler):
         adam = AdamW(model.parameters())
         profiling(model, tokens, adam, args)
