@@ -4,6 +4,7 @@ import torch.nn as nn
 import timeit
 import numpy as np
 from cs336_basics.model import RMSNorm
+from triton_rmsnorm import rms_norm_triton
 
 def get_args():
     parser = argparse.ArgumentParser()
@@ -65,6 +66,30 @@ def time_layernorm(x, w, b, args):
     std_dev = np.std(times)
     return mean_time, std_dev
 
+def time_rms_triton(x, w, args):
+    hidden_size = x.shape[-1]
+    x = x.to(args.device)
+    w = w.to(args.device)
+    rms_layer = rms_norm_triton.apply
+    rms_layer = rms_layer.to(args.device)
+    
+    for _ in range(args.warmup_steps):
+        out = rms_layer(x, w)
+    
+    torch.cuda.synchronize()
+    
+    times = []
+    for _ in range(args.measurement_steps):
+        start_time = timeit.default_timer()
+        out = rms_layer(x, w)
+        torch.cuda.synchronize()
+        end_time = timeit.default_timer()
+        times.append(end_time-start_time)
+   
+    mean_time = np.mean(times)
+    std_dev = np.std(times)
+    return mean_time, std_dev
+
 
 def main():
     args = get_args()
@@ -75,10 +100,13 @@ def main():
         weight_layer_norm = torch.randn(i).to(args.device)
         bias_layer_norm = torch.randn(i).to(args.device)
         rms_time, rms_std_dev = time_rms(input, weight_rms, args)
+        rms_triton_time, rms_triton_std_dev = time_rms_triton(input, weight_rms, args)
         layernorm_time, layernorm_std_dev = time_layernorm(input, weight_layer_norm, bias_layer_norm, args)
         print(f'Hidden size = {i}')
         print(f'rms norm, Mean time: {rms_time:0.6f}, std_dev : {rms_std_dev:0.6f}')
+        print(f'rms norm_triton, Mean time: {rms_triton_time:0.6f}, std_dev : {rms_triton_std_dev:0.6f}')
         print(f'layer norm, Mean time: {layernorm_time:0.6f}, std_dev : {layernorm_std_dev:0.6f}')
-        print(f'ratio of mean times = {rms_time/layernorm_time :0.6f}\n')
+        
+        print(f'ratio of rms to layer_norm mean times = {rms_time/layernorm_time :0.6f}\n')
 if __name__=='__main__':
     main()
