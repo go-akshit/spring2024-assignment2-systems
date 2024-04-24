@@ -132,6 +132,8 @@ class rms_norm_triton(torch.autograd.Function):
         d_model = x.shape[-1]
         orig_shape = x.shape
         x = x.reshape(-1, d_model)
+        grad_out = grad_out.reshape(-1, d_model)
+
         ctx.BLOCK_SIZE = triton.next_power_of_2(d_model)
         grad_weight = torch.empty(x.shape, device = x.device)
         grad_x = torch.empty(x.shape, device = x.device)
@@ -139,6 +141,7 @@ class rms_norm_triton(torch.autograd.Function):
         rms_triton_bwd[(n_rows, )](grad_out, grad_x, grad_weight, x, weight, x.stride(0), d_model, num_warps=16, BLOCK_SIZE=ctx.BLOCK_SIZE)
         grad_weight = torch.sum(grad_weight, dim=0)
         x = x.reshape(orig_shape)
+        grad_out = grad_out.reshape(orig_shape)
         grad_x = rmsnorm_jvp_x(x, weight, grad_out)
         return grad_x, grad_weight        
         

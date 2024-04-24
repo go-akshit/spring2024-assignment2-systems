@@ -1,0 +1,26 @@
+measurement steps = 1000
+
+Hidden size = 1024
+rms norm, Mean time: 0.000571, std_dev : 0.000005
+rms norm_triton, Mean time: 0.000234, std_dev : 0.000005
+layer norm, Mean time: 0.000192, std_dev : 0.000001
+ratio of rms to layer_norm mean times = 2.973525
+
+Hidden size = 2048
+rms norm, Mean time: 0.001106, std_dev : 0.000005
+rms norm_triton, Mean time: 0.000342, std_dev : 0.000032
+layer norm, Mean time: 0.000324, std_dev : 0.000001
+ratio of rms to layer_norm mean times = 3.413888
+
+Hidden size = 4096
+rms norm, Mean time: 0.002159, std_dev : 0.000005
+rms norm_triton, Mean time: 0.000607, std_dev : 0.000005
+layer norm, Mean time: 0.000803, std_dev : 0.000001
+ratio of rms to layer_norm mean times = 2.688989
+
+Hidden size = 8192
+rms norm, Mean time: 0.004264, std_dev : 0.000006
+rms norm_triton, Mean time: 0.001146, std_dev : 0.000005
+layer norm, Mean time: 0.001650, std_dev : 0.000001
+ratio of rms to layer_norm mean times = 2.584720
+

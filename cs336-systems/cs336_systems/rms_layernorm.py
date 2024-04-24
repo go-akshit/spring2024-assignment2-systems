@@ -71,7 +71,6 @@ def time_rms_triton(x, w, args):
     x = x.to(args.device)
     w = w.to(args.device)
     rms_layer = rms_norm_triton.apply
-    rms_layer = rms_layer.to(args.device)
     
     for _ in range(args.warmup_steps):
         out = rms_layer(x, w)
