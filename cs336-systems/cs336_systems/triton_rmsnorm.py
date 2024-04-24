@@ -4,18 +4,50 @@ import triton
 import triton.language as tl
 
 
+def rmsnorm_jvp_x(x, g, grad_output):
+    shape_orig = x.shape 
+    d_model = g.shape[0]
+    x = x.reshape(-1, d_model)
+    grad_output = grad_output.reshape(-1, d_model)
+    rms = torch.sqrt(torch.mean(x*x, dim=-1, keepdim=True))
+    y = torch.empty(x.shape)
+    #import pdb; pdb.set_trace()
+    # for row in range(y.shape[0]):
+    #     for col in range(y.shape[1]):
+    #         temp = -x[row][col]/(d_model * pow(rms[row][0], 3)) * g * x[row] * grad_output[row]
+    #         y[row][col] = torch.sum(temp, dim=-1)
+    #         y[row][col] += grad_output[row][col] * (g[col]/rms[row][0]).squeeze(dim=0) 
+
+    
+    temp1 = -(x/(d_model * pow(rms,3))).unsqueeze(-1)
+    temp2 = (g * x * grad_output).unsqueeze(-2)
+    temp = torch.sum(temp1 * temp2, dim=-1) + grad_output*g/rms
+    y = temp.reshape(shape_orig)
+    return y
+
+def rmsnorm_jvp_g(x, g, grad_output):
+    rms = torch.rsqrt(torch.mean(x*x, dim=-1, keepdim=True))
+    temp = x*rms*grad_output
+    grad_g = torch.sum(temp, dim=(0,1))
+    return grad_g
+
 class rms_norm_pytorch(torch.autograd.Function):
     @staticmethod
     def forward(ctx, x, weight):
         rms = torch.rsqrt(torch.mean(x*x, dim=-1, keepdim=True))
+        ctx.save_for_backward(x, weight)
         return x*rms*weight
     
     @staticmethod
     def backward(ctx, grad_out):
-        raise NotImplementedError
+        x, weight = ctx.saved_tensors
+        grad_weight = rmsnorm_jvp_g(x, weight ,grad_out)
+        grad_x = rmsnorm_jvp_x(x, weight, grad_out)
+        return grad_x, grad_weight
+
 
 @triton.jit
-def rms_triton(x_ptr : tl.pointer_type, 
+def rms_triton_fwd(x_ptr : tl.pointer_type, 
                weight_ptr : tl.pointer_type, 
                x_row_stride : tl.uint32, 
                output_ptr :tl.pointer_type, 
@@ -47,6 +79,20 @@ def rms_triton(x_ptr : tl.pointer_type,
     #    print("output", output)
     tl.store(output_ptrs, output, mask=mask)
 
+# @triton.jit
+# def rms_triton_bwd(grad_out_ptr: tl.pointer_type,
+#                    grad_x_ptr: tl.pointer_type,
+#                    grad_weight_ptr: tl.pointer_type, 
+#                    x_ptr: tl.pointer_type,
+#                    weight_ptr: tl.pointer_type, 
+#                    x_row_stride: tl.uint32,
+#                    d_model: tl.unit32, 
+#                    BLOCK_SIZE: tl.constexpr):
+    
+#     row_idx = tl.program_id(0)
+#     row_start_ptr = x_ptr + row_idx * x_row_stride
+
+
 
 class rms_norm_triton(torch.autograd.Function):
     @staticmethod
@@ -63,13 +109,17 @@ class rms_norm_triton(torch.autograd.Function):
         ctx.BLOCK_SIZE = triton.next_power_of_2(d_model)
         y = torch.empty(x.shape, device = x.device)
         n_rows = x.shape[0]
-        rms_triton[(n_rows, )](x, weight, x.stride(0), y, d_model, num_warps=16, BLOCK_SIZE=ctx.BLOCK_SIZE)
+        rms_triton_fwd[(n_rows, )](x, weight, x.stride(0), y, d_model, num_warps=16, BLOCK_SIZE=ctx.BLOCK_SIZE)
         y = y.reshape(orig_shape)
         return y
     
     @staticmethod
     def backward(ctx, grad_out):
-        raise NotImplementedError
+        x, weight = ctx.saved_tensors
+        grad_weight = rmsnorm_jvp_g(x, weight ,grad_out)
+        grad_x = rmsnorm_jvp_x(x, weight, grad_out)
+        return grad_x, grad_weight        
+        
 
 
 

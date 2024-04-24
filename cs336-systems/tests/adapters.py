@@ -6,7 +6,7 @@ from typing import Type
 import torch
 import sys
 sys.path.insert(0, './cs336-systems/cs336_systems')
-from triton_rmsnorm import rms_norm_pytorch, rms_norm_triton
+from triton_rmsnorm import rms_norm_pytorch, rms_norm_triton, rmsnorm_jvp_g, rmsnorm_jvp_x
 
 def get_rmsnorm_autograd_function_pytorch() -> Type:
     """
@@ -55,7 +55,7 @@ def rmsnorm_backward_g_pytorch(
     Returns:
         Gradient of the loss with respect to g. Shape: (H,)
     """
-    raise NotImplementedError
+    return rmsnorm_jvp_g(x, g, grad_output)
 
 
 def rmsnorm_backward_x_pytorch(
@@ -76,7 +76,7 @@ def rmsnorm_backward_x_pytorch(
     Returns:
         Gradient of the loss with respect to x. Shape: (*, H)
     """
-    raise NotImplementedError
+    return rmsnorm_jvp_x(x, g, grad_output)
 
 
 def get_ddp_individual_parameters(module: torch.nn.Module) -> torch.nn.Module:
