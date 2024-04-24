@@ -79,18 +79,31 @@ def rms_triton_fwd(x_ptr : tl.pointer_type,
     #    print("output", output)
     tl.store(output_ptrs, output, mask=mask)
 
-# @triton.jit
-# def rms_triton_bwd(grad_out_ptr: tl.pointer_type,
-#                    grad_x_ptr: tl.pointer_type,
-#                    grad_weight_ptr: tl.pointer_type, 
-#                    x_ptr: tl.pointer_type,
-#                    weight_ptr: tl.pointer_type, 
-#                    x_row_stride: tl.uint32,
-#                    d_model: tl.unit32, 
-#                    BLOCK_SIZE: tl.constexpr):
+@triton.jit
+def rms_triton_bwd(grad_out_ptr: tl.pointer_type,
+                   grad_x_ptr: tl.pointer_type,
+                   partial_grad_weight_ptr: tl.pointer_type, 
+                   x_ptr: tl.pointer_type,
+                   weight_ptr: tl.pointer_type, 
+                   x_row_stride: tl.uint32,
+                   D_MODEL: tl.uint32, 
+                   BLOCK_SIZE: tl.constexpr):
     
-#     row_idx = tl.program_id(0)
-#     row_start_ptr = x_ptr + row_idx * x_row_stride
+    row_idx = tl.program_id(0)
+    row_start_ptr = x_ptr + row_idx*x_row_stride
+    
+    offsets = tl.arange(0, BLOCK_SIZE)
+    x_ptrs = row_start_ptr + offsets
+    grad_out_ptrs = grad_out_ptr + row_idx*x_row_stride + offsets
+    partial_grad_weight_ptrs = partial_grad_weight_ptr +  row_idx*x_row_stride + offsets
+
+    mask = offsets < D_MODEL
+    row = tl.load(x_ptrs, mask=mask, other=0)
+    grad_out = tl.load(grad_out_ptrs, mask=mask, other=0)
+
+    rms = tl.sqrt(tl.sum(row*row)/D_MODEL)
+    partial_grad_weight = (row*grad_out)/rms
+    tl.store(partial_grad_weight_ptrs, partial_grad_weight, mask=mask)
 
 
 
@@ -116,7 +129,16 @@ class rms_norm_triton(torch.autograd.Function):
     @staticmethod
     def backward(ctx, grad_out):
         x, weight = ctx.saved_tensors
-        grad_weight = rmsnorm_jvp_g(x, weight ,grad_out)
+        d_model = x.shape[-1]
+        orig_shape = x.shape
+        x = x.reshape(-1, d_model)
+        ctx.BLOCK_SIZE = triton.next_power_of_2(d_model)
+        grad_weight = torch.empty(x.shape, device = x.device)
+        grad_x = torch.empty(x.shape, device = x.device)
+        n_rows = x.shape[0]
+        rms_triton_bwd[(n_rows, )]()
+        grad_weight = rmsnorm_jvp_g(grad_out, grad_x, grad_weight, x, weight, x.stride(0), d_model, num_warps=16, BLOCK_SIZE=ctx.BLOCK_SIZE)
+        grad_weight = torch.sum(grad_weight, dim=0)
         grad_x = rmsnorm_jvp_x(x, weight, grad_out)
         return grad_x, grad_weight        
         
