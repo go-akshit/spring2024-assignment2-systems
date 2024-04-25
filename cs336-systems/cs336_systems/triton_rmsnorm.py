@@ -85,9 +85,6 @@ def rms_triton_bwd(grad_out_ptr: tl.pointer_type,
                    partial_grad_weight_ptr: tl.pointer_type, 
                    x_ptr: tl.pointer_type,
                    weight_ptr: tl.pointer_type,
-                   temp1_ptr: tl.pointer_type,
-                   temp2_ptr: tl.pointer_type, 
-                   temp3_ptr: tl.pointer_type, 
                    x_row_stride: tl.uint32,
                    D_MODEL: tl.uint32, 
                    BLOCK_SIZE: tl.constexpr):
@@ -101,9 +98,6 @@ def rms_triton_bwd(grad_out_ptr: tl.pointer_type,
     grad_out_ptrs = grad_out_ptr + row_idx*x_row_stride + offsets
     grad_x_ptrs = grad_x_ptr + row_idx*x_row_stride + offsets
     partial_grad_weight_ptrs = partial_grad_weight_ptr +  row_idx*x_row_stride + offsets
-    temp1_ptrs = temp1_ptr + row_idx*x_row_stride + offsets
-    temp2_ptrs = temp2_ptr + row_idx*x_row_stride + offsets
-    temp3_ptrs = temp3_ptr + row_idx*x_row_stride + offsets
 
     mask = offsets < D_MODEL
     row = tl.load(x_ptrs, mask=mask, other=0)
@@ -117,21 +111,13 @@ def rms_triton_bwd(grad_out_ptr: tl.pointer_type,
     temp1 = -row/(D_MODEL * rms * rms * rms)
     temp2 = weight * row * grad_out
     
-    temp7 = tl.expand_dims(temp1,0)
-    temp5 = tl.broadcast_to(temp7, [BLOCK_SIZE, BLOCK_SIZE])
-    temp9 = tl.sum(temp5)
+    temp1 = tl.expand_dims(temp1,0)
+    temp1 = tl.broadcast_to(temp1, [BLOCK_SIZE, BLOCK_SIZE])
     
-    tl.store(temp1_ptrs, temp1, mask=mask)
-    temp6 = tl.expand_dims(temp2, 1)
-    temp8 = tl.broadcast_to(temp6, [BLOCK_SIZE, BLOCK_SIZE])
-    temp10 = tl.sum(temp8, axis=0)
+    temp2 = tl.expand_dims(temp2, 1)
+    temp2 = tl.broadcast_to(temp2, [BLOCK_SIZE, BLOCK_SIZE])
 
-    tl.store(temp2_ptrs, temp2, mask=mask)
-    temp3 = tl.sum(temp5 * temp8, axis=0)
-    temp3 = temp3 + grad_out*weight/rms
-    tl.store(temp3_ptrs, temp3, mask=mask)
-    #temp2.expand_dims(0)
-    grad_x = tl.sum(temp1 * temp2) + grad_out * weight/rms
+    grad_x = tl.sum(temp1 * temp2, axis=0) + grad_out*weight/rms
     tl.store(grad_x_ptrs, grad_x, mask=mask)
 
 
@@ -167,27 +153,13 @@ class rms_norm_triton(torch.autograd.Function):
         ctx.BLOCK_SIZE = triton.next_power_of_2(d_model)
         grad_weight = torch.empty(x.shape, device = x.device)
         grad_x = torch.empty(x.shape, device = x.device)
-        temp1 = torch.empty(x.shape, device = x.device)
-        temp2 = torch.empty(x.shape, device = x.device)
-        temp3 = torch.empty(x.shape, device = x.device)
+        
         n_rows = x.shape[0]
-        #temp1 = temp1.unsqueeze(-1)
-        #temp2 = temp2.unsqueeze(-2)
-        #temp3 = temp1 * temp2
-        rms_triton_bwd[(n_rows, )](grad_out, grad_x, grad_weight, x, weight, temp1, temp2, temp3, x.stride(0), d_model, num_warps=16, BLOCK_SIZE=ctx.BLOCK_SIZE)
+
+        rms_triton_bwd[(n_rows, )](grad_out, grad_x, grad_weight, x, weight, x.stride(0), d_model, num_warps=16, BLOCK_SIZE=ctx.BLOCK_SIZE)
         grad_weight = torch.sum(grad_weight, dim=0)
-        # x = x.reshape(orig_shape)
-        # grad_out = grad_out.reshape(orig_shape)
-        # grad_x = rmsnorm_jvp_x(x, weight, grad_out)
-
-        rms = torch.sqrt(torch.mean(x*x, dim=-1, keepdim=True))
-        # temp1 = temp1.unsqueeze(-1)
-        # temp2 = temp2.unsqueeze(-2)
-        #import pdb; pdb.set_trace()
-        #temp = temp3 + grad_out*weight/rms
-        grad_x = temp3.reshape(orig_shape)
-
         grad_x = grad_x.reshape(orig_shape)
+        
         return grad_x, grad_weight        
         
 
