@@ -87,6 +87,7 @@ def rms_triton_bwd(grad_out_ptr: tl.pointer_type,
                    weight_ptr: tl.pointer_type,
                    temp1_ptr: tl.pointer_type,
                    temp2_ptr: tl.pointer_type, 
+                   temp3_ptr: tl.pointer_type, 
                    x_row_stride: tl.uint32,
                    D_MODEL: tl.uint32, 
                    BLOCK_SIZE: tl.constexpr):
@@ -102,6 +103,7 @@ def rms_triton_bwd(grad_out_ptr: tl.pointer_type,
     partial_grad_weight_ptrs = partial_grad_weight_ptr +  row_idx*x_row_stride + offsets
     temp1_ptrs = temp1_ptr + row_idx*x_row_stride + offsets
     temp2_ptrs = temp2_ptr + row_idx*x_row_stride + offsets
+    temp3_ptrs = temp3_ptr + row_idx*x_row_stride + offsets
 
     mask = offsets < D_MODEL
     row = tl.load(x_ptrs, mask=mask, other=0)
@@ -119,8 +121,10 @@ def rms_triton_bwd(grad_out_ptr: tl.pointer_type,
     tl.expand_dims(temp1, 1)
     #temp1.expand_dims(1)
     tl.expand_dims(temp2, 0)
+    temp3 = temp1 * temp2
     tl.store(temp1_ptrs, temp1, mask=mask)
     tl.store(temp2_ptrs, temp2, mask=mask)
+    tl.store(temp3_ptrs, temp3, mask=mask)
     #temp2.expand_dims(0)
     grad_x = tl.sum(temp1 * temp2) + grad_out * weight/rms
     tl.store(grad_x_ptrs, grad_x, mask=mask)
@@ -163,7 +167,8 @@ class rms_norm_triton(torch.autograd.Function):
         n_rows = x.shape[0]
         temp1 = temp1.unsqueeze(-1)
         temp2 = temp2.unsqueeze(-2)
-        rms_triton_bwd[(n_rows, )](grad_out, grad_x, grad_weight, x, weight, temp1, temp2, x.stride(0), d_model, num_warps=16, BLOCK_SIZE=ctx.BLOCK_SIZE)
+        temp3 = temp1 * temp2
+        rms_triton_bwd[(n_rows, )](grad_out, grad_x, grad_weight, x, weight, temp1, temp2, temp3, x.stride(0), d_model, num_warps=16, BLOCK_SIZE=ctx.BLOCK_SIZE)
         grad_weight = torch.sum(grad_weight, dim=0)
         # x = x.reshape(orig_shape)
         # grad_out = grad_out.reshape(orig_shape)
@@ -172,7 +177,7 @@ class rms_norm_triton(torch.autograd.Function):
         rms = torch.sqrt(torch.mean(x*x, dim=-1, keepdim=True))
         # temp1 = temp1.unsqueeze(-1)
         # temp2 = temp2.unsqueeze(-2)
-        temp = torch.sum(temp1 * temp2, dim=-1) + grad_out*weight/rms
+        temp = torch.sum(temp3, dim=-1) + grad_out*weight/rms
         grad_x = temp.reshape(orig_shape)
 
         grad_x = grad_x.reshape(orig_shape)
