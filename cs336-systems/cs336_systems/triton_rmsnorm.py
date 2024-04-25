@@ -94,16 +94,27 @@ def rms_triton_bwd(grad_out_ptr: tl.pointer_type,
     
     offsets = tl.arange(0, BLOCK_SIZE)
     x_ptrs = row_start_ptr + offsets
+    weight_ptrs = weight_ptr + offsets
     grad_out_ptrs = grad_out_ptr + row_idx*x_row_stride + offsets
+    grad_x_ptrs = grad_x_ptr + row_idx*x_row_stride + offsets
     partial_grad_weight_ptrs = partial_grad_weight_ptr +  row_idx*x_row_stride + offsets
 
     mask = offsets < D_MODEL
     row = tl.load(x_ptrs, mask=mask, other=0)
+    weight = tl.load(weight_ptrs, mask=mask, other=0)
     grad_out = tl.load(grad_out_ptrs, mask=mask, other=0)
 
     rms = tl.sqrt(tl.sum(row*row)/D_MODEL)
     partial_grad_weight = (row*grad_out)/rms
     tl.store(partial_grad_weight_ptrs, partial_grad_weight, mask=mask)
+
+    temp1 = -row/(D_MODEL * rms * rms * rms)
+    temp2 = weight * row * grad_out
+    temp1.expand_dims(1)
+    temp2.expand_dims(0)
+    grad_x = tl.sum(temp1 * temp2) + grad_out * weight/rms
+    tl.store(grad_x_ptrs, grad_x, mask=mask)
+
 
 
 
