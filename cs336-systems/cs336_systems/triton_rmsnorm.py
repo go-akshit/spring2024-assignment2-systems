@@ -110,8 +110,10 @@ def rms_triton_bwd(grad_out_ptr: tl.pointer_type,
 
     temp1 = -row/(D_MODEL * rms * rms * rms)
     temp2 = weight * row * grad_out
-    temp1.expand_dims(1)
-    temp2.expand_dims(0)
+    tl.expand_dims(temp1, 1)
+    #temp1.expand_dims(1)
+    tl.expand_dims(temp2, 0)
+    #temp2.expand_dims(0)
     grad_x = tl.sum(temp1 * temp2) + grad_out * weight/rms
     tl.store(grad_x_ptrs, grad_x, mask=mask)
 
