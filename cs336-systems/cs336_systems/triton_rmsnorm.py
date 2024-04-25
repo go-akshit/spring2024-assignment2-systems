@@ -121,8 +121,7 @@ def rms_triton_bwd(grad_out_ptr: tl.pointer_type,
     tl.expand_dims(temp1, 1)
     #temp1.expand_dims(1)
     tl.expand_dims(temp2, 0)
-    tl.broadcast_to(temp1, (BLOCK_SIZE, BLOCK_SIZE))
-    tl.broadcast_to(temp2, (BLOCK_SIZE, BLOCK_SIZE))
+    tl.broadcast(temp1 temp2)
     temp3 = temp1 * temp2
     tl.store(temp1_ptrs, temp1, mask=mask)
     tl.store(temp2_ptrs, temp2, mask=mask)
