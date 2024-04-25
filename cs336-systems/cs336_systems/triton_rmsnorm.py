@@ -118,13 +118,20 @@ def rms_triton_bwd(grad_out_ptr: tl.pointer_type,
     temp2 = weight * row * grad_out
     
 
-    tl.expand_dims(temp1, 1)
-    #temp1.expand_dims(1)
-    tl.expand_dims(temp2, 0)
-    tl.broadcast(temp1 temp2)
-    temp3 = temp1 * temp2
+
+
+    temp7 = tl.expand_dims(temp1,0)
+    temp5 = tl.broadcast_to(temp7, [BLOCK_SIZE, BLOCK_SIZE])
+    temp9 = tl.sum(temp5)
+    
     tl.store(temp1_ptrs, temp1, mask=mask)
+    temp6 = tl.expand_dims(temp2, 1)
+    temp8 = tl.broadcast_to(temp6, [BLOCK_SIZE, BLOCK_SIZE])
+    temp10 = tl.sum(temp8, axis=0)
+
     tl.store(temp2_ptrs, temp2, mask=mask)
+    temp3 = tl.sum(temp5 * temp8, axis=0)
+
     tl.store(temp3_ptrs, temp3, mask=mask)
     #temp2.expand_dims(0)
     grad_x = tl.sum(temp1 * temp2) + grad_out * weight/rms
@@ -165,10 +172,11 @@ class rms_norm_triton(torch.autograd.Function):
         grad_x = torch.empty(x.shape, device = x.device)
         temp1 = torch.empty(x.shape, device = x.device)
         temp2 = torch.empty(x.shape, device = x.device)
+        temp3 = torch.empty(x.shape, device = x.device)
         n_rows = x.shape[0]
-        temp1 = temp1.unsqueeze(-1)
-        temp2 = temp2.unsqueeze(-2)
-        temp3 = temp1 * temp2
+        #temp1 = temp1.unsqueeze(-1)
+        #temp2 = temp2.unsqueeze(-2)
+        #temp3 = temp1 * temp2
         rms_triton_bwd[(n_rows, )](grad_out, grad_x, grad_weight, x, weight, temp1, temp2, temp3, x.stride(0), d_model, num_warps=16, BLOCK_SIZE=ctx.BLOCK_SIZE)
         grad_weight = torch.sum(grad_weight, dim=0)
         # x = x.reshape(orig_shape)
@@ -178,7 +186,8 @@ class rms_norm_triton(torch.autograd.Function):
         rms = torch.sqrt(torch.mean(x*x, dim=-1, keepdim=True))
         # temp1 = temp1.unsqueeze(-1)
         # temp2 = temp2.unsqueeze(-2)
-        temp = torch.sum(temp3, dim=-1) + grad_out*weight/rms
+        #import pdb; pdb.set_trace()
+        temp = temp3 + grad_out*weight/rms
         grad_x = temp.reshape(orig_shape)
 
         grad_x = grad_x.reshape(orig_shape)
