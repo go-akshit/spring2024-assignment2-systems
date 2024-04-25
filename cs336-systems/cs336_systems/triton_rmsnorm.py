@@ -114,12 +114,13 @@ def rms_triton_bwd(grad_out_ptr: tl.pointer_type,
 
     temp1 = -row/(D_MODEL * rms * rms * rms)
     temp2 = weight * row * grad_out
-    tl.store(temp1_ptrs, temp1, mask=mask)
-    tl.store(temp2_ptrs, temp2, mask=mask)
+    
 
     tl.expand_dims(temp1, 1)
     #temp1.expand_dims(1)
     tl.expand_dims(temp2, 0)
+    tl.store(temp1_ptrs, temp1, mask=mask)
+    tl.store(temp2_ptrs, temp2, mask=mask)
     #temp2.expand_dims(0)
     grad_x = tl.sum(temp1 * temp2) + grad_out * weight/rms
     tl.store(grad_x_ptrs, grad_x, mask=mask)
@@ -160,6 +161,8 @@ class rms_norm_triton(torch.autograd.Function):
         temp1 = torch.empty(x.shape, device = x.device)
         temp2 = torch.empty(x.shape, device = x.device)
         n_rows = x.shape[0]
+        temp1 = temp1.unsqueeze(-1)
+        temp2 = temp2.unsqueeze(-2)
         rms_triton_bwd[(n_rows, )](grad_out, grad_x, grad_weight, x, weight, temp1, temp2, x.stride(0), d_model, num_warps=16, BLOCK_SIZE=ctx.BLOCK_SIZE)
         grad_weight = torch.sum(grad_weight, dim=0)
         # x = x.reshape(orig_shape)
@@ -167,8 +170,8 @@ class rms_norm_triton(torch.autograd.Function):
         # grad_x = rmsnorm_jvp_x(x, weight, grad_out)
 
         rms = torch.sqrt(torch.mean(x*x, dim=-1, keepdim=True))
-        temp1 = temp1.unsqueeze(-1)
-        temp2 = temp2.unsqueeze(-2)
+        # temp1 = temp1.unsqueeze(-1)
+        # temp2 = temp2.unsqueeze(-2)
         temp = torch.sum(temp1 * temp2, dim=-1) + grad_out*weight/rms
         grad_x = temp.reshape(orig_shape)
 
