@@ -84,7 +84,9 @@ def rms_triton_bwd(grad_out_ptr: tl.pointer_type,
                    grad_x_ptr: tl.pointer_type,
                    partial_grad_weight_ptr: tl.pointer_type, 
                    x_ptr: tl.pointer_type,
-                   weight_ptr: tl.pointer_type, 
+                   weight_ptr: tl.pointer_type,
+                   temp1_ptr: tl.pointer_type,
+                   temp2_ptr: tl.pointer_type, 
                    x_row_stride: tl.uint32,
                    D_MODEL: tl.uint32, 
                    BLOCK_SIZE: tl.constexpr):
@@ -98,6 +100,8 @@ def rms_triton_bwd(grad_out_ptr: tl.pointer_type,
     grad_out_ptrs = grad_out_ptr + row_idx*x_row_stride + offsets
     grad_x_ptrs = grad_x_ptr + row_idx*x_row_stride + offsets
     partial_grad_weight_ptrs = partial_grad_weight_ptr +  row_idx*x_row_stride + offsets
+    temp1_ptrs = temp1_ptr + row_idx*x_row_stride + offsets
+    temp2_ptrs = temp2_ptr + row_idx*x_row_stride + offsets
 
     mask = offsets < D_MODEL
     row = tl.load(x_ptrs, mask=mask, other=0)
@@ -110,6 +114,9 @@ def rms_triton_bwd(grad_out_ptr: tl.pointer_type,
 
     temp1 = -row/(D_MODEL * rms * rms * rms)
     temp2 = weight * row * grad_out
+    tl.store(temp1_ptrs, temp1, mask=mask)
+    tl.store(temp2_ptrs, temp2, mask=mask)
+
     tl.expand_dims(temp1, 1)
     #temp1.expand_dims(1)
     tl.expand_dims(temp2, 0)
@@ -150,12 +157,21 @@ class rms_norm_triton(torch.autograd.Function):
         ctx.BLOCK_SIZE = triton.next_power_of_2(d_model)
         grad_weight = torch.empty(x.shape, device = x.device)
         grad_x = torch.empty(x.shape, device = x.device)
+        temp1 = torch.empty(x.shape, device = x.device)
+        temp2 = torch.empty(x.shape, device = x.device)
         n_rows = x.shape[0]
-        rms_triton_bwd[(n_rows, )](grad_out, grad_x, grad_weight, x, weight, x.stride(0), d_model, num_warps=16, BLOCK_SIZE=ctx.BLOCK_SIZE)
+        rms_triton_bwd[(n_rows, )](grad_out, grad_x, grad_weight, x, weight, temp1, temp2, x.stride(0), d_model, num_warps=16, BLOCK_SIZE=ctx.BLOCK_SIZE)
         grad_weight = torch.sum(grad_weight, dim=0)
         # x = x.reshape(orig_shape)
         # grad_out = grad_out.reshape(orig_shape)
         # grad_x = rmsnorm_jvp_x(x, weight, grad_out)
+
+        rms = torch.sqrt(torch.mean(x*x, dim=-1, keepdim=True))
+        temp1 = temp1.unsqueeze(-1)
+        temp2 = temp2.unsqueeze(-2)
+        temp = torch.sum(temp1 * temp2, dim=-1) + grad_out*weight/rms
+        grad_x = temp.reshape(orig_shape)
+
         grad_x = grad_x.reshape(orig_shape)
         return grad_x, grad_weight        
         
