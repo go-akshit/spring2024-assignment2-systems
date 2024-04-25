@@ -117,9 +117,6 @@ def rms_triton_bwd(grad_out_ptr: tl.pointer_type,
     temp1 = -row/(D_MODEL * rms * rms * rms)
     temp2 = weight * row * grad_out
     
-
-
-
     temp7 = tl.expand_dims(temp1,0)
     temp5 = tl.broadcast_to(temp7, [BLOCK_SIZE, BLOCK_SIZE])
     temp9 = tl.sum(temp5)
@@ -131,7 +128,7 @@ def rms_triton_bwd(grad_out_ptr: tl.pointer_type,
 
     tl.store(temp2_ptrs, temp2, mask=mask)
     temp3 = tl.sum(temp5 * temp8, axis=0)
-
+    temp3 = temp3 + grad_out*weight/rms
     tl.store(temp3_ptrs, temp3, mask=mask)
     #temp2.expand_dims(0)
     grad_x = tl.sum(temp1 * temp2) + grad_out * weight/rms
@@ -187,8 +184,8 @@ class rms_norm_triton(torch.autograd.Function):
         # temp1 = temp1.unsqueeze(-1)
         # temp2 = temp2.unsqueeze(-2)
         #import pdb; pdb.set_trace()
-        temp = temp3 + grad_out*weight/rms
-        grad_x = temp.reshape(orig_shape)
+        #temp = temp3 + grad_out*weight/rms
+        grad_x = temp3.reshape(orig_shape)
 
         grad_x = grad_x.reshape(orig_shape)
         return grad_x, grad_weight        
