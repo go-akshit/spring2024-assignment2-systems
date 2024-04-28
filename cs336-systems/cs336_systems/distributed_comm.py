@@ -76,13 +76,17 @@ def distributed_demo(rank, *args):
         #tensor_data.copy_(orig_tensor_data)
         
         #print(f"rank: {rank} data (after all-reduce): {data}")
-        
+    mean_duration_per_rank = np.mean(durations)
+    durations_all_ranks = []
+    dist.all_gather_object(durations_all_ranks, mean_duration_per_rank)
+    
     
     #print(f"Mean time = {np.mean(durations):0.6f}. std deviation = {np.std(durations):0.6f}")
     print(f"{data_size}, {backend}, {device}, {np.mean(durations):0.6f}")
+    print(f"duration all ranks {durations_all_ranks}")
         
 
-if __name__ == "__main__":
+def main():
     args = get_args()
     for backend, device in [('gloo', 'cpu'), ('gloo', 'gpu'), ('nccl', 'gpu')]:
         for size in ['512K', '1M', '10M', '50M', '100M', '500M', '1G']:
@@ -93,4 +97,9 @@ if __name__ == "__main__":
                                                                                 args.num_warmup_steps, 
                                                                                 args.num_trial_steps), 
                                                                                 )
+            return
+
+if __name__ == "__main__":
+    main()
+    
             
