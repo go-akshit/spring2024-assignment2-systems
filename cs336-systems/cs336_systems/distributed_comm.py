@@ -13,8 +13,8 @@ def get_args():
     parser.add_argument("--device", type=str, choices=['cpu', 'gpu'], default='cpu', help="default:cpu")
     parser.add_argument("--data_size", type=str, choices=['512K', '1M', '10M', '50M', '100M', '500M', '1G'], default='512K', help="default:512K")
     parser.add_argument("--n_procs", type=int, choices=[2, 4, 6], default=2, help="default:2")
-    parser.add_argument("--num_warmup_steps", type=int, default=5, help="default:5")
-    parser.add_argument("--num_trial_steps", type=int, default=5, help="default:5")
+    parser.add_argument("--num_warmup_steps", type=int, default=0, help="default:0")
+    parser.add_argument("--num_trial_steps", type=int, default=1, help="default:1")
     args = parser.parse_args()
     return args
 
@@ -40,7 +40,7 @@ def distributed_demo(rank, *args):
     setup(rank=rank, world_size=n_procs, backend=backend, device=device)
     num_elements = size_to_bytes(data_size)//4
     orig_tensor_data = torch.randint(0, 10, (num_elements,))
-    tensor_data = orig_tensor_data.clone()
+    tensor_data = orig_tensor_data
 
     for _ in range(warmup):
         data = tensor_data
@@ -48,7 +48,7 @@ def distributed_demo(rank, *args):
         if(device == 'gpu'):
             torch.cuda.synchronize()
         dist.barrier()
-        tensor_data.copy_(orig_tensor_data)
+        #tensor_data.copy_(orig_tensor_data)
     
     durations = []
     for _ in range(trial):
@@ -65,7 +65,7 @@ def distributed_demo(rank, *args):
         end_time = timeit.default_timer()
         duration = end_time - start_time
         durations.append(duration)
-        tensor_data.copy_(orig_tensor_data)
+        #tensor_data.copy_(orig_tensor_data)
         
         print(f"rank: {rank} data (after all-reduce): {data}")
         
