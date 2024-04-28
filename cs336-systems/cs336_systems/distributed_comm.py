@@ -95,7 +95,7 @@ def main():
                                                                                 device, 
                                                                                 args.n_procs, 
                                                                                 args.num_warmup_steps, 
-                                                                                args.num_trial_steps), 
+                                                                                args.num_trial_steps, 
                                                                                 )
             return
 
