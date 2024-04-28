@@ -37,6 +37,8 @@ def size_to_bytes(size_str):
 
 def distributed_demo(rank, *args):
     data_size, backend, device, n_procs, warmup, trial = args
+    print("########################################")
+    print(f"data: {data_size}, backend: {backend}, device: {device}")
     setup(rank=rank, world_size=n_procs, backend=backend, device=device)
     num_elements = size_to_bytes(data_size)//4
     if device == 'gpu':
@@ -54,6 +56,8 @@ def distributed_demo(rank, *args):
         dist.barrier()
         #tensor_data.copy_(orig_tensor_data)
     
+    orig_tensor_data = torch.randint(0, 10, (num_elements,), device=device)
+    tensor_data = orig_tensor_data
     durations = []
     for _ in range(trial):
         data = tensor_data
@@ -79,10 +83,13 @@ def distributed_demo(rank, *args):
 
 if __name__ == "__main__":
     args = get_args()
-    mp.spawn(fn=distributed_demo, nprocs=args.n_procs, join=True, args=(args.data_size, 
-                                                                        args.backend, 
-                                                                        args.device, 
-                                                                        args.n_procs, 
-                                                                        args.num_warmup_steps, 
-                                                                        args.num_trial_steps), 
-                                                                        )
+    for backend, device in [('gloo', 'cpu'), ('gloo', 'gpu'), ('nccl', 'gpu')]:
+        for size in ['512K', '1M', '10M', '50M', '100M', '500M', '1G']:
+            mp.spawn(fn=distributed_demo, nprocs=args.n_procs, join=True, args=(size,
+                                                                                backend, 
+                                                                                device, 
+                                                                                args.n_procs, 
+                                                                                args.num_warmup_steps, 
+                                                                                args.num_trial_steps), 
+                                                                                )
+            
