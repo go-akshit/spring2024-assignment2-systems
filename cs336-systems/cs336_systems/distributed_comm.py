@@ -78,7 +78,7 @@ def distributed_demo(rank, *args):
         #print(f"rank: {rank} data (after all-reduce): {data}")
     mean_duration_per_rank = np.mean(durations)
     durations_all_ranks = []
-    dist.all_gather_object(durations_all_ranks, mean_duration_per_rank)
+    #dist.all_gather_object(durations_all_ranks, mean_duration_per_rank)
     
     
     #print(f"Mean time = {np.mean(durations):0.6f}. std deviation = {np.std(durations):0.6f}")
