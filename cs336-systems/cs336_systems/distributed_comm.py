@@ -39,7 +39,11 @@ def distributed_demo(rank, *args):
     data_size, backend, device, n_procs, warmup, trial = args
     setup(rank=rank, world_size=n_procs, backend=backend, device=device)
     num_elements = size_to_bytes(data_size)//4
-    orig_tensor_data = torch.randint(0, 10, (num_elements,))
+    if device == 'gpu':
+        device = f"cuda:{rank}"
+    else:
+        device = "cpu"
+    orig_tensor_data = torch.randint(0, 10, (num_elements,), device=device)
     tensor_data = orig_tensor_data
 
     for _ in range(warmup):

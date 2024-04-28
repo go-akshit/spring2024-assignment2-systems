@@ -1,0 +1,29 @@
+Traceback (most recent call last):
+  File "/home/c-akshit/assn2/spring2024-assignment2-systems/cs336-systems/cs336_systems/distributed_comm.py", line 78, in <module>
+    mp.spawn(fn=distributed_demo, nprocs=args.n_procs, join=True, args=(args.data_size, 
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/c-akshit/miniconda3/lib/python3.12/site-packages/torch/multiprocessing/spawn.py", line 241, in spawn
+    return start_processes(fn, args, nprocs, join, daemon, start_method="spawn")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/c-akshit/miniconda3/lib/python3.12/site-packages/torch/multiprocessing/spawn.py", line 197, in start_processes
+    while not context.join():
+              ^^^^^^^^^^^^^^
+  File "/home/c-akshit/miniconda3/lib/python3.12/site-packages/torch/multiprocessing/spawn.py", line 158, in join
+    raise ProcessRaisedException(msg, error_index, failed_process.pid)
+torch.multiprocessing.spawn.ProcessRaisedException: 
+
+-- Process 0 terminated with the following error:
+Traceback (most recent call last):
+  File "/home/c-akshit/miniconda3/lib/python3.12/site-packages/torch/multiprocessing/spawn.py", line 68, in _wrap
+    fn(i, *args)
+  File "/home/c-akshit/assn2/spring2024-assignment2-systems/cs336-systems/cs336_systems/distributed_comm.py", line 59, in distributed_demo
+    dist.all_reduce(tensor=data, async_op=False)
+  File "/home/c-akshit/miniconda3/lib/python3.12/site-packages/torch/distributed/c10d_logger.py", line 72, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/c-akshit/miniconda3/lib/python3.12/site-packages/torch/distributed/distributed_c10d.py", line 1992, in all_reduce
+    work = group.allreduce([tensor], opts)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: No backend type associated with device type cpu
+
+mv: cannot stat 'lm_profiler_stacks.txt': No such file or directory

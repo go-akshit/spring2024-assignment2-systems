@@ -1,0 +1,6 @@
+rank: 1 data (before all-reduce): tensor([8, 8, 8,  ..., 3, 0, 9])
+rank: 1 data (after all-reduce): tensor([14, 10, 17,  ...,  8,  9, 11])
+Mean time = 0.009450. std deviation = 0.000000
+rank: 0 data (before all-reduce): tensor([6, 2, 9,  ..., 5, 9, 2])
+rank: 0 data (after all-reduce): tensor([14, 10, 17,  ...,  8,  9, 11])
+Mean time = 0.009451. std deviation = 0.000000

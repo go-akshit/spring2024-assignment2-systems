@@ -1,0 +1,6 @@
+rank: 1 data (before all-reduce): tensor([6, 1, 2,  ..., 6, 3, 7], device='cuda:1')
+rank: 1 data (after all-reduce): tensor([ 8,  5, 10,  ..., 15,  3, 14], device='cuda:1')
+Mean time = 2.263645. std deviation = 0.000000
+rank: 0 data (before all-reduce): tensor([2, 4, 8,  ..., 9, 0, 7], device='cuda:0')
+rank: 0 data (after all-reduce): tensor([ 8,  5, 10,  ..., 15,  3, 14], device='cuda:0')
+Mean time = 2.231429. std deviation = 0.000000

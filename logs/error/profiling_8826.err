@@ -1,0 +1,25 @@
+Traceback (most recent call last):
+  File "/home/c-akshit/assn2/spring2024-assignment2-systems/cs336-systems/cs336_systems/distributed_comm.py", line 82, in <module>
+    mp.spawn(fn=distributed_demo, nprocs=args.n_procs, join=True, args=(args.data_size, 
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/c-akshit/miniconda3/lib/python3.12/site-packages/torch/multiprocessing/spawn.py", line 241, in spawn
+    return start_processes(fn, args, nprocs, join, daemon, start_method="spawn")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/c-akshit/miniconda3/lib/python3.12/site-packages/torch/multiprocessing/spawn.py", line 197, in start_processes
+    while not context.join():
+              ^^^^^^^^^^^^^^
+  File "/home/c-akshit/miniconda3/lib/python3.12/site-packages/torch/multiprocessing/spawn.py", line 158, in join
+    raise ProcessRaisedException(msg, error_index, failed_process.pid)
+torch.multiprocessing.spawn.ProcessRaisedException: 
+
+-- Process 1 terminated with the following error:
+Traceback (most recent call last):
+  File "/home/c-akshit/miniconda3/lib/python3.12/site-packages/torch/multiprocessing/spawn.py", line 68, in _wrap
+    fn(i, *args)
+  File "/home/c-akshit/assn2/spring2024-assignment2-systems/cs336-systems/cs336_systems/distributed_comm.py", line 40, in distributed_demo
+    setup(rank=rank, world_size=n_procs, backend=backend, device=device)
+  File "/home/c-akshit/assn2/spring2024-assignment2-systems/cs336-systems/cs336_systems/distributed_comm.py", line 25, in setup
+    raise ValueError("NCCL backend is not compatible with CPU devices.")
+ValueError: NCCL backend is not compatible with CPU devices.
+
+mv: cannot stat 'lm_profiler_stacks.txt': No such file or directory
