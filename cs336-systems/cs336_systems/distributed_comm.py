@@ -37,8 +37,8 @@ def size_to_bytes(size_str):
 
 def distributed_demo(rank, *args):
     data_size, backend, device, n_procs, warmup, trial = args
-    print("########################################")
-    print(f"data: {data_size}, backend: {backend}, device: {device}")
+    #print("########################################")
+    #print(f"data: {data_size}, backend: {backend}, device: {device}")
     setup(rank=rank, world_size=n_procs, backend=backend, device=device)
     num_elements = size_to_bytes(data_size)//4
     if device == 'gpu':
@@ -61,7 +61,7 @@ def distributed_demo(rank, *args):
     durations = []
     for _ in range(trial):
         data = tensor_data
-        print(f"rank: {rank} data (before all-reduce): {data}")
+        #print(f"rank: {rank} data (before all-reduce): {data}")
         start_time = timeit.default_timer()
         
         dist.all_reduce(tensor=data, async_op=False)
@@ -75,10 +75,11 @@ def distributed_demo(rank, *args):
         durations.append(duration)
         #tensor_data.copy_(orig_tensor_data)
         
-        print(f"rank: {rank} data (after all-reduce): {data}")
+        #print(f"rank: {rank} data (after all-reduce): {data}")
         
     
-    print(f"Mean time = {np.mean(durations):0.6f}. std deviation = {np.std(durations):0.6f}")
+    #print(f"Mean time = {np.mean(durations):0.6f}. std deviation = {np.std(durations):0.6f}")
+    print(f"{data_size}, {backend}, {device}, {np.mean(durations):0.6f}")
         
 
 if __name__ == "__main__":
