@@ -88,17 +88,26 @@ def distributed_demo(rank, *args):
 
 def main():
     args = get_args()
-    for backend, device in [('gloo', 'cpu'), ('gloo', 'gpu'), ('nccl', 'gpu')]:
-        for size in ['512K', '1M', '10M', '50M', '100M', '500M', '1G']:
-            mp.spawn(fn=distributed_demo, nprocs=args.n_procs, join=True, args=(size,
-                                                                                backend, 
-                                                                                device, 
-                                                                                args.n_procs, 
-                                                                                args.num_warmup_steps, 
-                                                                                args.num_trial_steps, 
-                                                                                )
-            return
-
+    # for backend, device in [('gloo', 'cpu'), ('gloo', 'gpu'), ('nccl', 'gpu')]:
+    #     for size in ['512K', '1M', '10M', '50M', '100M', '500M', '1G']:
+    #         mp.spawn(fn=distributed_demo, nprocs=args.n_procs, join=True, args=(size,
+    #                                                                             backend, 
+    #                                                                             device, 
+    #                                                                             args.n_procs, 
+    #                                                                             args.num_warmup_steps, 
+    #                                                                             args.num_trial_steps)
+    #                                                                             )
+    #         return
+    backend = 'gloo'
+    device = 'cpu'
+    size = '512K'
+    mp.spawn(fn=distributed_demo, nprocs=args.n_procs, join=True, args=(size,
+                                                                        backend, 
+                                                                        device, 
+                                                                        args.n_procs, 
+                                                                        args.num_warmup_steps, 
+                                                                        args.num_trial_steps), 
+                                                                        )
 if __name__ == "__main__":
     main()
     
