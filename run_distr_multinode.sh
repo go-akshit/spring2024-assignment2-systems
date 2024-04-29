@@ -18,7 +18,7 @@ export MASTER_ADDR=$(scontrol show hostnames "$SLURM_JOB_NODELIST" | head -n 1)
 echo "MASTER_PORT: ${MASTER_PORT}"
 echo "MASTER_ADDR: ${MASTER_ADDR}"
 
-srun python3 cs336-systems/cs336_systems/distributed_multinode.py
+srun python3 cs336-systems/cs336_systems/distributed_multinode.py --backend 'nccl' --device 'gpu'
 
 mkdir -p logs/output
 mkdir -p logs/error

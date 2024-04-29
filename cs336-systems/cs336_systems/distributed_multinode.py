@@ -46,7 +46,7 @@ def size_to_bytes(size_str):
     return int(value)*multiple
 
 
-def multinode_distributed_demo(args):
+def multinode_distributed_demo(*args):
     data_size, backend, device, warmup, trial = args
     rank, world_size, local_rank, local_world_size = setup(backend=backend, device=device)
     print( f"World size: {world_size}, global rank: {rank}, local rank: {local_rank}, local world size: {local_world_size}")

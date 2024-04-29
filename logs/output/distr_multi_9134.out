@@ -1,0 +1,18 @@
+MASTER_PORT: 19134
+MASTER_ADDR: ad12a3ca-01
+World size: 4, global rank: 1, local rank: 1, local world size: 2
+rank: 1 data (before all-reduce): tensor([3, 2, 8,  ..., 3, 0, 2], device='cuda:1')
+rank: 1 data (after all-reduce): tensor([25, 15, 19,  ...,  7, 11, 13], device='cuda:1')
+512K, nccl, cuda:1, 0.002733
+World size: 4, global rank: 3, local rank: 1, local world size: 2
+rank: 3 data (before all-reduce): tensor([9, 5, 0,  ..., 3, 1, 6], device='cuda:1')
+rank: 3 data (after all-reduce): tensor([25, 15, 19,  ...,  7, 11, 13], device='cuda:1')
+512K, nccl, cuda:1, 0.003503
+World size: 4, global rank: 0, local rank: 0, local world size: 2
+rank: 0 data (before all-reduce): tensor([6, 4, 6,  ..., 0, 5, 0], device='cuda:0')
+rank: 0 data (after all-reduce): tensor([25, 15, 19,  ...,  7, 11, 13], device='cuda:0')
+512K, nccl, cuda:0, 0.002288
+World size: 4, global rank: 2, local rank: 0, local world size: 2
+rank: 2 data (before all-reduce): tensor([7, 4, 5,  ..., 1, 5, 5], device='cuda:0')
+rank: 2 data (after all-reduce): tensor([25, 15, 19,  ...,  7, 11, 13], device='cuda:0')
+512K, nccl, cuda:0, 0.003352

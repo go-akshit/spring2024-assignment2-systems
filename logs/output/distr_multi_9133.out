@@ -1,0 +1,18 @@
+MASTER_PORT: 19133
+MASTER_ADDR: ad12a3ca-01
+World size: 4, global rank: 1, local rank: 1, local world size: 2
+rank: 1 data (before all-reduce): tensor([8, 5, 0,  ..., 3, 1, 9])
+rank: 1 data (after all-reduce): tensor([24, 20,  5,  ..., 19,  5, 24])
+512K, gloo, cpu, 0.002697
+World size: 4, global rank: 2, local rank: 0, local world size: 2
+rank: 2 data (before all-reduce): tensor([4, 5, 2,  ..., 2, 3, 5])
+rank: 2 data (after all-reduce): tensor([24, 20,  5,  ..., 19,  5, 24])
+512K, gloo, cpu, 0.002190
+World size: 4, global rank: 3, local rank: 1, local world size: 2
+rank: 3 data (before all-reduce): tensor([5, 4, 0,  ..., 9, 0, 8])
+rank: 3 data (after all-reduce): tensor([24, 20,  5,  ..., 19,  5, 24])
+512K, gloo, cpu, 0.002784
+World size: 4, global rank: 0, local rank: 0, local world size: 2
+rank: 0 data (before all-reduce): tensor([7, 6, 3,  ..., 5, 1, 2])
+rank: 0 data (after all-reduce): tensor([24, 20,  5,  ..., 19,  5, 24])
+512K, gloo, cpu, 0.002107
