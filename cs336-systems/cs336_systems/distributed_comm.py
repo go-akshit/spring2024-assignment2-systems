@@ -77,37 +77,31 @@ def distributed_demo(rank, *args):
         
         #print(f"rank: {rank} data (after all-reduce): {data}")
     mean_duration_per_rank = np.mean(durations)
-    durations_all_ranks = []
+    #durations_all_ranks = [None] * n_procs
     #dist.all_gather_object(durations_all_ranks, mean_duration_per_rank)
     
     
     #print(f"Mean time = {np.mean(durations):0.6f}. std deviation = {np.std(durations):0.6f}")
-    print(f"{data_size}, {backend}, {device}, {np.mean(durations):0.6f}")
-    print(f"duration all ranks {durations_all_ranks}")
+    if rank == 0:
+        print(f"{data_size}, {backend}, {device}, {n_procs}, {mean_duration_per_rank:0.6f}")
+    #print(f"duration all ranks {durations_all_ranks}")
         
 
 def main():
     args = get_args()
-    # for backend, device in [('gloo', 'cpu'), ('gloo', 'gpu'), ('nccl', 'gpu')]:
-    #     for size in ['512K', '1M', '10M', '50M', '100M', '500M', '1G']:
-    #         mp.spawn(fn=distributed_demo, nprocs=args.n_procs, join=True, args=(size,
-    #                                                                             backend, 
-    #                                                                             device, 
-    #                                                                             args.n_procs, 
-    #                                                                             args.num_warmup_steps, 
-    #                                                                             args.num_trial_steps)
-    #                                                                             )
-    #         return
-    backend = 'gloo'
-    device = 'cpu'
-    size = '512K'
-    mp.spawn(fn=distributed_demo, nprocs=args.n_procs, join=True, args=(size,
-                                                                        backend, 
-                                                                        device, 
-                                                                        args.n_procs, 
-                                                                        args.num_warmup_steps, 
-                                                                        args.num_trial_steps), 
-                                                                        )
+    for backend, device in [('nccl', 'gpu'), ('gloo', 'cpu'), ('gloo', 'gpu')]:
+        for size in  ['512K', '1M', '10M', '50M', '100M', '500M', '1G']:
+            #backend = 'nccl'
+            #device = 'gpu'
+            mp.spawn(fn=distributed_demo, nprocs=args.n_procs, join=True, args=(size,
+                                                                                 backend, 
+                                                                                 device, 
+                                                                                 args.n_procs, 
+                                                                                 args.num_warmup_steps, 
+                                                                                 args.num_trial_steps)
+                                                                                 )
+            #return
+            
 if __name__ == "__main__":
     main()
     
