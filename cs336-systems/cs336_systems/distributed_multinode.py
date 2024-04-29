@@ -18,7 +18,8 @@ def get_args():
     args = parser.parse_args()
     return args
 
-def setup(backend, device):
+#def setup(backend, device):
+def setup():
     # These variables are set via srun
     rank = int(os.environ["SLURM_PROCID"])
     local_rank = int(os.environ["SLURM_LOCALID"])
@@ -33,8 +34,8 @@ def setup(backend, device):
     timeout = timedelta(seconds=60)
     dist.init_process_group("gloo", rank=rank, world_size=world_size, timeout=timeout)
 
-    if(backend == 'nccl' and device=='cpu'):
-        raise ValueError("NCCL backend is not compatible with CPU devices.")
+    # if(backend == 'nccl' and device=='cpu'):
+    #     raise ValueError("NCCL backend is not compatible with CPU devices.")
     
     return rank, world_size, local_rank, local_world_size
 
@@ -46,62 +47,70 @@ def size_to_bytes(size_str):
     return int(value)*multiple
 
 
-def multinode_distributed_demo(*args):
-    data_size, backend, device, warmup, trial = args
-    rank, world_size, local_rank, local_world_size = setup(backend=backend, device=device)
+# def multinode_distributed_demo():
+#     # data_size, backend, device, warmup, trial = args
+#     rank, world_size, local_rank, local_world_size = setup(backend=backend, device=device)
+#     print( f"World size: {world_size}, global rank: {rank}, local rank: {local_rank}, local world size: {local_world_size}")
+    
+#     num_elements = size_to_bytes(data_size)//4
+#     if device == 'gpu':
+#         device = f"cuda:{rank}"
+#     else:
+#         device = "cpu"
+#     orig_tensor_data = torch.randint(0, 10, (num_elements,), device=device)
+#     tensor_data = orig_tensor_data
+
+#     for _ in range(warmup):
+#         data = tensor_data
+#         dist.all_reduce(tensor=data, async_op=False)
+#         if(device == 'gpu'):
+#             torch.cuda.synchronize()
+#         dist.barrier()
+    
+#     orig_tensor_data = torch.randint(0, 10, (num_elements,), device=device)
+#     tensor_data = orig_tensor_data
+#     durations = []
+#     for _ in range(trial):
+#         data = tensor_data
+#         print(f"rank: {rank} data (before all-reduce): {data}")
+#         start_time = timeit.default_timer()
+        
+#         dist.all_reduce(tensor=data, async_op=False)
+        
+#         if(device == 'gpu'):
+#             torch.cuda.synchronize()
+#         dist.barrier()
+
+#         end_time = timeit.default_timer()
+#         duration = end_time - start_time
+#         durations.append(duration)
+        
+#         print(f"rank: {rank} data (after all-reduce): {data}")
+    
+#     mean_duration_per_rank = np.mean(durations)
+#     #durations_all_ranks = [None] * n_procs
+#     #dist.all_gather_object(durations_all_ranks, mean_duration_per_rank)
+    
+    
+#     #print(f"Mean time = {np.mean(durations):0.6f}. std deviation = {np.std(durations):0.6f}")
+#     # if rank == 0:
+#         # print(f"{data_size}, {backend}, {device}, {n_procs}, {mean_duration_per_rank:0.6f}")
+#     #print(f"duration all ranks {durations_all_ranks}")
+
+def multinode_distributed_demo():
+    rank, world_size, local_rank, local_world_size = setup()
     print( f"World size: {world_size}, global rank: {rank}, local rank: {local_rank}, local world size: {local_world_size}")
-    
-    num_elements = size_to_bytes(data_size)//4
-    if device == 'gpu':
-        device = f"cuda:{rank}"
-    else:
-        device = "cpu"
-    orig_tensor_data = torch.randint(0, 10, (num_elements,), device=device)
-    tensor_data = orig_tensor_data
-
-    for _ in range(warmup):
-        data = tensor_data
-        dist.all_reduce(tensor=data, async_op=False)
-        if(device == 'gpu'):
-            torch.cuda.synchronize()
-        dist.barrier()
-    
-    orig_tensor_data = torch.randint(0, 10, (num_elements,), device=device)
-    tensor_data = orig_tensor_data
-    durations = []
-    for _ in range(trial):
-        data = tensor_data
-        print(f"rank: {rank} data (before all-reduce): {data}")
-        start_time = timeit.default_timer()
-        
-        dist.all_reduce(tensor=data, async_op=False)
-        
-        if(device == 'gpu'):
-            torch.cuda.synchronize()
-        dist.barrier()
-
-        end_time = timeit.default_timer()
-        duration = end_time - start_time
-        durations.append(duration)
-        
-        print(f"rank: {rank} data (after all-reduce): {data}")
-    
-    mean_duration_per_rank = np.mean(durations)
-    #durations_all_ranks = [None] * n_procs
-    #dist.all_gather_object(durations_all_ranks, mean_duration_per_rank)
-    
-    
-    #print(f"Mean time = {np.mean(durations):0.6f}. std deviation = {np.std(durations):0.6f}")
-    # if rank == 0:
-        # print(f"{data_size}, {backend}, {device}, {n_procs}, {mean_duration_per_rank:0.6f}")
-    #print(f"duration all ranks {durations_all_ranks}")
-        
+    data = torch.ones(5)
+    print(f"rank {rank} data (before all-reduce): {data}")
+    dist.all_reduce(data, async_op=False)
+    print(f"rank {rank} data (after all-reduce): {data}") 
 
 def main():
     args = get_args()
-    arguments = (args.data_size,args.backend,args.device,args.num_warmup_steps,args.num_trial_steps)
-    multinode_distributed_demo(*arguments)
-
+    # arguments = (args.data_size,args.backend,args.device,args.num_warmup_steps,args.num_trial_steps)
+    # multinode_distributed_demo(*arguments)
+    multinode_distributed_demo()
+    
 if __name__ == "__main__":
     main()
     
