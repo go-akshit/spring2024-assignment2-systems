@@ -1,0 +1,37 @@
+expr: syntax error: missing argument after ‘+’
+MASTER_PORT: 
+MASTER_ADDR: 
+Traceback (most recent call last):
+  File "/home/c-akshit/assn2/spring2024-assignment2-systems/cs336-systems/cs336_systems/distributed_multinode.py", line 109, in <module>
+Traceback (most recent call last):
+  File "/home/c-akshit/assn2/spring2024-assignment2-systems/cs336-systems/cs336_systems/distributed_multinode.py", line 109, in <module>
+Traceback (most recent call last):
+  File "/home/c-akshit/assn2/spring2024-assignment2-systems/cs336-systems/cs336_systems/distributed_multinode.py", line 109, in <module>
+    main()
+  File "/home/c-akshit/assn2/spring2024-assignment2-systems/cs336-systems/cs336_systems/distributed_multinode.py", line 102, in main
+    main()
+  File "/home/c-akshit/assn2/spring2024-assignment2-systems/cs336-systems/cs336_systems/distributed_multinode.py", line 102, in main
+    multinode_distributed_demo((args.data_size,
+  File "/home/c-akshit/assn2/spring2024-assignment2-systems/cs336-systems/cs336_systems/distributed_multinode.py", line 50, in multinode_distributed_demo
+Traceback (most recent call last):
+  File "/home/c-akshit/assn2/spring2024-assignment2-systems/cs336-systems/cs336_systems/distributed_multinode.py", line 109, in <module>
+    data_size, backend, device, warmup, trial = args
+    main()
+  File "/home/c-akshit/assn2/spring2024-assignment2-systems/cs336-systems/cs336_systems/distributed_multinode.py", line 102, in main
+ValueError: not enough values to unpack (expected 5, got 1)
+    main()
+    multinode_distributed_demo((args.data_size,
+  File "/home/c-akshit/assn2/spring2024-assignment2-systems/cs336-systems/cs336_systems/distributed_multinode.py", line 50, in multinode_distributed_demo
+  File "/home/c-akshit/assn2/spring2024-assignment2-systems/cs336-systems/cs336_systems/distributed_multinode.py", line 102, in main
+    data_size, backend, device, warmup, trial = args
+ValueError: not enough values to unpack (expected 5, got 1)
+    multinode_distributed_demo((args.data_size,
+  File "/home/c-akshit/assn2/spring2024-assignment2-systems/cs336-systems/cs336_systems/distributed_multinode.py", line 50, in multinode_distributed_demo
+    multinode_distributed_demo((args.data_size,
+  File "/home/c-akshit/assn2/spring2024-assignment2-systems/cs336-systems/cs336_systems/distributed_multinode.py", line 50, in multinode_distributed_demo
+    data_size, backend, device, warmup, trial = args
+ValueError: not enough values to unpack (expected 5, got 1)
+    data_size, backend, device, warmup, trial = args
+ValueError: not enough values to unpack (expected 5, got 1)
+srun: error: ad12a3ca-02: tasks 2-3: Exited with exit code 1
+srun: error: ad12a3ca-01: tasks 0-1: Exited with exit code 1
