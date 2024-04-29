@@ -99,11 +99,8 @@ def multinode_distributed_demo(*args):
 
 def main():
     args = get_args()
-    multinode_distributed_demo((args.data_size,
-                                     args.backend,
-                                     args.device,
-                                     args.num_warmup_steps,
-                                     args.num_trial_steps))
+    arguments = (args.data_size,args.backend,args.device,args.num_warmup_steps,args.num_trial_steps)
+    multinode_distributed_demo(arguments)
 
 if __name__ == "__main__":
     main()
