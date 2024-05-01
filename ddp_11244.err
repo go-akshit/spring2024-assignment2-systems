@@ -1,0 +1,2 @@
+mv: cannot stat 'distr*out': No such file or directory
+mv: cannot stat 'distr*err': No such file or directory

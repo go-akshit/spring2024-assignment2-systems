@@ -1,0 +1,60 @@
+Traceback (most recent call last):
+  File "/home/c-akshit/assn2/spring2024-assignment2-systems/cs336-systems/cs336_systems/naive_ddp.py", line 155, in <module>
+Traceback (most recent call last):
+  File "/home/c-akshit/assn2/spring2024-assignment2-systems/cs336-systems/cs336_systems/naive_ddp.py", line 155, in <module>
+    main()
+  File "/home/c-akshit/assn2/spring2024-assignment2-systems/cs336-systems/cs336_systems/naive_ddp.py", line 152, in main
+    main()
+  File "/home/c-akshit/assn2/spring2024-assignment2-systems/cs336-systems/cs336_systems/naive_ddp.py", line 152, in main
+    ddp(args)
+  File "/home/c-akshit/assn2/spring2024-assignment2-systems/cs336-systems/cs336_systems/naive_ddp.py", line 131, in ddp
+Traceback (most recent call last):
+  File "/home/c-akshit/assn2/spring2024-assignment2-systems/cs336-systems/cs336_systems/naive_ddp.py", line 155, in <module>
+    ddp(args)
+  File "/home/c-akshit/assn2/spring2024-assignment2-systems/cs336-systems/cs336_systems/naive_ddp.py", line 131, in ddp
+Traceback (most recent call last):
+  File "/home/c-akshit/assn2/spring2024-assignment2-systems/cs336-systems/cs336_systems/naive_ddp.py", line 155, in <module>
+    run(args, model=model, optimizer=optimizer, num_iterations=1, inputs = sharded_input, target=sharded_target)
+  File "/home/c-akshit/assn2/spring2024-assignment2-systems/cs336-systems/cs336_systems/naive_ddp.py", line 64, in run
+    main()
+  File "/home/c-akshit/assn2/spring2024-assignment2-systems/cs336-systems/cs336_systems/naive_ddp.py", line 152, in main
+    run(args, model=model, optimizer=optimizer, num_iterations=1, inputs = sharded_input, target=sharded_target)
+  File "/home/c-akshit/assn2/spring2024-assignment2-systems/cs336-systems/cs336_systems/naive_ddp.py", line 64, in run
+    ddp(args)
+  File "/home/c-akshit/assn2/spring2024-assignment2-systems/cs336-systems/cs336_systems/naive_ddp.py", line 131, in ddp
+    dist.all_reduce(tensor=param.grad, op=dist.ReduceOp.AVG, async_op=False)
+  File "/home/c-akshit/miniconda3/envs/cs336_systems/lib/python3.10/site-packages/torch/distributed/c10d_logger.py", line 72, in wrapper
+    run(args, model=model, optimizer=optimizer, num_iterations=1, inputs = sharded_input, target=sharded_target)
+  File "/home/c-akshit/assn2/spring2024-assignment2-systems/cs336-systems/cs336_systems/naive_ddp.py", line 64, in run
+    dist.all_reduce(tensor=param.grad, op=dist.ReduceOp.AVG, async_op=False)
+  File "/home/c-akshit/miniconda3/envs/cs336_systems/lib/python3.10/site-packages/torch/distributed/c10d_logger.py", line 72, in wrapper
+    dist.all_reduce(tensor=param.grad, op=dist.ReduceOp.AVG, async_op=False)
+  File "/home/c-akshit/miniconda3/envs/cs336_systems/lib/python3.10/site-packages/torch/distributed/c10d_logger.py", line 72, in wrapper
+    return func(*args, **kwargs)
+  File "/home/c-akshit/miniconda3/envs/cs336_systems/lib/python3.10/site-packages/torch/distributed/distributed_c10d.py", line 1997, in all_reduce
+    main()
+  File "/home/c-akshit/assn2/spring2024-assignment2-systems/cs336-systems/cs336_systems/naive_ddp.py", line 152, in main
+    return func(*args, **kwargs)
+  File "/home/c-akshit/miniconda3/envs/cs336_systems/lib/python3.10/site-packages/torch/distributed/distributed_c10d.py", line 1997, in all_reduce
+    ddp(args)
+  File "/home/c-akshit/assn2/spring2024-assignment2-systems/cs336-systems/cs336_systems/naive_ddp.py", line 131, in ddp
+    work.wait()
+RuntimeError: Cannot use ReduceOp.AVG with Gloo
+    run(args, model=model, optimizer=optimizer, num_iterations=1, inputs = sharded_input, target=sharded_target)
+  File "/home/c-akshit/assn2/spring2024-assignment2-systems/cs336-systems/cs336_systems/naive_ddp.py", line 64, in run
+    work.wait()
+    dist.all_reduce(tensor=param.grad, op=dist.ReduceOp.AVG, async_op=False)
+  File "/home/c-akshit/miniconda3/envs/cs336_systems/lib/python3.10/site-packages/torch/distributed/c10d_logger.py", line 72, in wrapper
+RuntimeError: Cannot use ReduceOp.AVG with Gloo
+    return func(*args, **kwargs)
+  File "/home/c-akshit/miniconda3/envs/cs336_systems/lib/python3.10/site-packages/torch/distributed/distributed_c10d.py", line 1997, in all_reduce
+    return func(*args, **kwargs)
+  File "/home/c-akshit/miniconda3/envs/cs336_systems/lib/python3.10/site-packages/torch/distributed/distributed_c10d.py", line 1997, in all_reduce
+    work.wait()
+RuntimeError: Cannot use ReduceOp.AVG with Gloo
+    work.wait()
+RuntimeError: Cannot use ReduceOp.AVG with Gloo
+srun: error: ad12a3ca-02: tasks 2-3: Exited with exit code 1
+srun: error: ad12a3ca-01: tasks 0-1: Exited with exit code 1
+mv: cannot stat 'distr*out': No such file or directory
+mv: cannot stat 'distr*err': No such file or directory

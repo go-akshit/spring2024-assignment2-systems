@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "/home/c-akshit/assn2/spring2024-assignment2-systems/cs336-systems/cs336_systems/naive_ddp.py", line 151, in <module>
+    main()
+  File "/home/c-akshit/assn2/spring2024-assignment2-systems/cs336-systems/cs336_systems/naive_ddp.py", line 148, in main
+    ddp(args)
+  File "/home/c-akshit/assn2/spring2024-assignment2-systems/cs336-systems/cs336_systems/naive_ddp.py", line 137, in ddp
+    assert torch.allclose(non_parallel_model_parameter, ddp_model_parameter)
+AssertionError
+srun: error: ad12a3ca-01: task 0: Exited with exit code 1
+mv: cannot stat 'distr*out': No such file or directory
+mv: cannot stat 'distr*err': No such file or directory
