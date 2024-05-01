@@ -104,11 +104,11 @@ def broadcast_parameters(model, optimizer):
         for k, v in state.items():
             dist.broadcast(v, src=0)
 
-def ddp(args, input, target, model, optimizer):
-    import pdb; pdb.set_trace()
+def ddp(args):
+    #import pdb; pdb.set_trace()
     rank, local_rank, world_size, local_world_size = setup(args.backend, args.device)
     if args.device == 'gpu':
-        device = f'cuda{local_rank}'
+        device = f'cuda:{local_rank}'
     input, target, model, adam = get_model_optimizer_input_targer(args, device)
     
     sharded_batch_size = args.batch_size/world_size
@@ -131,7 +131,7 @@ def ddp(args, input, target, model, optimizer):
 def main():
     args = get_args()
     #input, target, model, adam = get_model_optimizer_input_targer(args)
-    ddp(args, input, target, model, adam)
+    ddp(args)
 
 if __name__ == "__main__":
     main()
