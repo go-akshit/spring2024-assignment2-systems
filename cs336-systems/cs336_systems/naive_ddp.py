@@ -127,7 +127,7 @@ def ddp(args, input, target, model, optimizer):
 def main():
     args = get_args()
     input, target, model, adam = get_model_optimizer_input_targer(args)
-    ddp(input, target, model, adam)
+    ddp(args, input, target, model, adam)
 
 if __name__ == "__main__":
     main()
