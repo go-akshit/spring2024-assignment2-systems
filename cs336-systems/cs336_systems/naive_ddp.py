@@ -78,11 +78,10 @@ def run_individual(args, model, optimizer, num_iterations, input, target):
         loss.backward()        
         optimizer.step()
 
-def get_model_optimizer_input_targer(args):
-    device = args.device
-    
+def get_model_optimizer_input_targer(args, device):
+        
     tokens = np.random.randint(0, 100, 5*args.context_length)
-    input, target = get_batch(tokens, args.batch_size, args.context_length, device="cuda")
+    input, target = get_batch(tokens, args.batch_size, args.context_length, device=device)
 
     model = model_def.BasicsTransformerLM(vocab_size=args.vocab_size, 
                                 context_length=args.context_length,
@@ -108,6 +107,10 @@ def broadcast_parameters(model, optimizer):
 def ddp(args, input, target, model, optimizer):
     import pdb; pdb.set_trace()
     rank, local_rank, world_size, local_world_size = setup(args.backend, args.device)
+    if args.device == 'gpu':
+        device = f'cuda{local_rank}'
+    input, target, model, adam = get_model_optimizer_input_targer(args, device)
+    
     sharded_batch_size = args.batch_size/world_size
     start_index = rank * sharded_batch_size
     end_index = start_index + sharded_batch_size
@@ -115,18 +118,19 @@ def ddp(args, input, target, model, optimizer):
     sharded_target = target[start_index: end_index]
     
     if(args.device == 'gpu'):
-        sharded_input = sharded_input.to(f'cuda{local_rank}')
-        model = model.to(f'cuda{local_rank}')
-        optimizer = optimizer.to(f"cuda{local_rank}")
+        sharded_input = sharded_input.to(device)
+        model = model.to(device)
+        optimizer = optimizer.to(device)
     
     broadcast_parameters(model, optimizer)
     run(model=model, optimizer=optimizer, num_iterations=1, input=sharded_input, target=sharded_target)
     run_individual(model=model, optimizer=optimizer, num_iterations=1, input=input, target=target)
+    print("both done")
 
 
 def main():
     args = get_args()
-    input, target, model, adam = get_model_optimizer_input_targer(args)
+    #input, target, model, adam = get_model_optimizer_input_targer(args)
     ddp(args, input, target, model, adam)
 
 if __name__ == "__main__":
