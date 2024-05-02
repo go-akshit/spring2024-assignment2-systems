@@ -67,6 +67,7 @@ class My_DDP_Bucket(nn.Module):
         self.current_bucket = []
         self.handles = []
         self.hooks = []
+        self.param_to_idx = {}
 
 
     def add_param_to_bucket(self, param):
@@ -76,14 +77,15 @@ class My_DDP_Bucket(nn.Module):
             self.current_bucket = []
             self.current_bucket_size = 0
         self.current_bucket.append(param)
+        self.param_to_idx[param.__hash__()] = len(self.buckets)
         self.current_bucket_size += param_size
-        hook = param.register_hook(lambda grad, param=param: self.hook_func(param))
+        hook = param.register_post_accumulate_grad_hook(self.hook_func)
         self.hooks.append(hook)
 
     def hook_func(self, param):
         if param.grad is not None:
             param.grad.data /= dist.get_world_size()
-        if all(hasattr(p, 'grad') and p.grad is not None for p in self.current_bucket):
+        if all(hasattr(p, 'grad') and p.grad is not None for p in self.buckets[self.param_to_idx[param.__hash__()]]):
             self.all_reduce_bucket(self.current_bucket)
 
     def all_reduce_bucket(self, bucket):
