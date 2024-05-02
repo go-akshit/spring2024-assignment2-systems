@@ -47,6 +47,7 @@ class My_DDP_Bucket(nn.Module):
         self.current_bucket = []
         self.handles = []
         self.hooks = []
+        self.param_to_idx = {}
 
         # Broadcast module's initial parameters to all workers
         for param in self.module.parameters():
