@@ -65,12 +65,7 @@ class My_DDP_Bucket(nn.Module):
             print(f"{self.param_to_idx = }")
             print(f"{len(self.buckets) = }")
     def start_gradient_synchronization_on_batch_start(self):
-        self.buckets = []
-        self.current_bucket_size = 0
-        self.current_bucket = []
         self.handles = []
-        self.hooks = []
-        self.param_to_idx = {}
 
 
     def add_param_to_bucket(self, param, i):
