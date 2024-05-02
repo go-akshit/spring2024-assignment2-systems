@@ -57,13 +57,13 @@ class My_DDP_Bucket(nn.Module):
         for i, param in enumerate(self.module.parameters()):
             if param.requires_grad:
                 self.add_param_to_bucket(param, i)
-        if dist.get_rank() == 0:
-            print(f"{self.param_to_idx = }")
-            print(f"{len(self.buckets) = }")
+        
         # Add any remaining parameters in the current bucket to the buckets list
         if self.current_bucket:
             self.buckets.append(self.current_bucket)
-
+        if dist.get_rank() == 0:
+            print(f"{self.param_to_idx = }")
+            print(f"{len(self.buckets) = }")
     def start_gradient_synchronization_on_batch_start(self):
         self.buckets = []
         self.current_bucket_size = 0
@@ -88,6 +88,10 @@ class My_DDP_Bucket(nn.Module):
     def hook_func(self, param, i):
         if param.grad is not None:
             param.grad.data /= dist.get_world_size()
+
+        print(f"rank = {dist.get_rank()}")
+        print(f"{self.param_to_idx = }")
+        print(f"{len(self.buckets) = }")
         if all(hasattr(p, 'grad') and p.grad is not None for p in self.buckets[self.param_to_idx[i]]):
             self.all_reduce_bucket(self.current_bucket)
 
