@@ -156,7 +156,7 @@ class My_DDP_Opt(torch.optim.Optimizer):
 
         super(My_DDP_Opt, self).__init__(params, kwargs)
 
-    def step(self, closure=None, **kwargs):
+    def step(self, closure, **kwargs):
         self.optimizer_per_rank.step(closure, **kwargs)
         for group in self.param_groups:
             for i, param in enumerate(group['params']):
