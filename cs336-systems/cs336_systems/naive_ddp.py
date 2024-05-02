@@ -13,6 +13,34 @@ from cs336_basics.data import get_batch
 import cs336_basics.nn_utils as utils
 from cs336_basics.optimizer import AdamW
 
+class _FC2(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.fc = nn.Linear(10, 5, bias=True)
+        self.fc.bias.requires_grad = False
+
+    def forward(self, x):
+        x = self.fc(x)
+        return x
+
+
+class ToyModel(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.fc1 = nn.Linear(10, 10, bias=False)
+        self.fc2 = _FC2()
+        self.fc3 = nn.Linear(5, 5, bias=False)
+        self.relu = nn.ReLU()
+        self.no_grad_fixed_param = nn.Parameter(
+            torch.tensor([2.0, 2.0]), requires_grad=False
+        )
+
+    def forward(self, x):
+        x = self.relu(self.fc1(x))
+        x = self.relu(self.fc2(x))
+        x = self.fc3(x)
+        return x
+
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--backend", type=str, choices=['gloo', 'nccl'], default='gloo', help="default:gloo")
@@ -85,18 +113,24 @@ def get_model_optimizer_input_target(args, device):
         torch.cuda.manual_seed_all(2)
     #tokens = np.random.randint(0, 100, 5*args.context_length)
     #input, target = get_batch(tokens, args.batch_size, args.context_length, device=device)
-    input = torch.randint(0, 100, (args.batch_size, args.context_length), device=device)
-    target = torch.randint(0, 100, (args.batch_size, args.context_length), device=device)
+    # input = torch.randint(0, 100, (args.batch_size, args.context_length), device=device)
+    # target = torch.randint(0, 100, (args.batch_size, args.context_length), device=device)
     
-    model = model_def.BasicsTransformerLM(vocab_size=args.vocab_size, 
-                                context_length=args.context_length,
-                                d_model=args.d_model,
-                                num_layers=args.num_layers,
-                                num_heads=args.num_heads,
-                                d_ff=args.d_ff,
-                                attn_pdrop= None,
-                                residual_pdrop=None, 
-                                norm_layer=args.norm_layer).to(device)
+    # model = model_def.BasicsTransformerLM(vocab_size=args.vocab_size, 
+    #                             context_length=args.context_length,
+    #                             d_model=args.d_model,
+    #                             num_layers=args.num_layers,
+    #                             num_heads=args.num_heads,
+    #                             d_ff=args.d_ff,
+    #                             attn_pdrop= None,
+    #                             residual_pdrop=None, 
+    #                             norm_layer=args.norm_layer).to(device)
+
+    model = ToyModel().to(device)
+    # Shape: (20, 10)
+    input = torch.load("ddp_test_data.pt")
+    # Shape: (20, 5)
+    target = torch.load("ddp_test_labels.pt")
     
     return input, target, model
 
