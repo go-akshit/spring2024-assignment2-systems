@@ -23,16 +23,16 @@ class My_DDP(nn.Module):
                 
     
     def hook_func(self, param):
-        dist.all_reduce(param.grad.data, op=dist.ReduceOp.SUM, async_op=True)
         param.grad.data /= dist.get_world_size()
-
-    
+        handle = dist.all_reduce(param.grad.data, op=dist.ReduceOp.SUM, async_op=True)
+        self.handles.append(handle)
         
     def forward(self, *inputs, **kwargs):
         return self.module(*inputs, **kwargs)
     
     def finish_gradient_synchronization(self):
-        dist.barrier()
+        for handle in self.handles:
+            handle.wait()
 
     def _del_(self):
         for hook in self.all_hooks:
