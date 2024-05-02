@@ -16,8 +16,9 @@ class My_DDP(nn.Module):
         
         # Register hook to synchronize gradients
         for param in self.module.parameters():
-            hook = param.register_post_accumulate_grad_hook(self.hook_func)
-            self.all_hooks.append(hook)
+            if param.requires_grad:
+                hook = param.register_post_accumulate_grad_hook(self.hook_func)
+                self.all_hooks.append(hook)
 
                 
     
