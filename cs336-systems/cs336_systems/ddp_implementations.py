@@ -156,7 +156,7 @@ class My_DDP_Opt(torch.optim.Optimizer):
 
         super(My_DDP_Opt, self).__init__(params, kwargs)
 
-    def step(self, closure, **kwargs):
+    def step(self, closure=None, **kwargs):
         self.optimizer_per_rank.step(closure, **kwargs)
         for group in self.param_groups:
             for i, param in enumerate(group['params']):
@@ -164,13 +164,10 @@ class My_DDP_Opt(torch.optim.Optimizer):
                 dist.broadcast(param.data, src=src)
         dist.barrier()
 
-    # def _get_rank(self, idx):
-    #     return idx % self.world_size
-
     def add_param_group(self, param_group):
         param_rank = {key: param_group[key] for key in param_group.keys() if key != 'params'}
         #param_rank[key] = param_group[key] if key != 'params' for key in param_group.keys()
-        param_rank = deepcopy(param_rank)
+        # param_rank = deepcopy(param_rank)
         param_rank['params'] = [param for i, param in enumerate(param_group['params']) if i % self.world_size == self.rank]
         if self.optimizer_per_rank is None:
             self.optimizer_per_rank = self.optimizer_cls([param_rank], **self.kwargs)
