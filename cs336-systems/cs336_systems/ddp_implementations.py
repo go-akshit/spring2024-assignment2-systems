@@ -138,4 +138,4 @@ class My_DDP_Opt(optim.Optimizer):
             self.optimizer_per_rank = self.optimizer_cls([param_rank], **self.kwargs)
         else:
             self.optimizer_per_rank.add_param_group(param_rank)
-        #super().add_param_group(param_group)
+        super().add_param_group(param_group)
