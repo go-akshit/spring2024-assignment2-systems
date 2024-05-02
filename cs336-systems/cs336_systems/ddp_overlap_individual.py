@@ -47,9 +47,6 @@ class My_DDP_Bucket(nn.Module):
         self.current_bucket = []
         self.handles = []
         self.hooks = []
-    
-    def start_gradient_synchronization_on_batch_start(self):
-        pass
 
         # Broadcast module's initial parameters to all workers
         for param in self.module.parameters():
@@ -64,6 +61,14 @@ class My_DDP_Bucket(nn.Module):
         if self.current_bucket:
             self.buckets.append(self.current_bucket)
 
+    def start_gradient_synchronization_on_batch_start(self):
+        self.buckets = []
+        self.current_bucket_size = 0
+        self.current_bucket = []
+        self.handles = []
+        self.hooks = []
+
+        
     def add_param_to_bucket(self, param):
         param_size = param.data.numel() * param.data.element_size()
         if self.current_bucket_size + param_size > self.bucket_size_mb:
