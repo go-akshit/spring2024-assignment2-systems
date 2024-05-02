@@ -7,21 +7,22 @@ class My_DDP(nn.Module):
         super(My_DDP, self).__init__()
         self.module = module
         self.handles = []
-
+        self.all_hooks = []
         # Broadcast module's initial parameters to all workers
         for param in self.module.parameters():
-            dist.broadcast(param.data, src=0)
+            dist.broadcast(param.data, src=0, async_op=False)
         
         # Register hook to synchronize gradients
         for param in self.module.parameters():
             if param.requires_grad:
-                param.register_post_accumulate_grad_hook(self.hook_func)
+                hook = param.register_post_accumulate_grad_hook(self.hook_func)
+                self.all_hooks.append(hook)
+
                 
     
     def hook_func(self, param):
-        handle = dist.all_reduce(tensor=param.grad.data, op=dist.ReduceOp.SUM, async_op=True)
+        dist.all_reduce(tensor=param.grad.data, op=dist.ReduceOp.SUM, async_op=True)
         param.grad.data /= dist.get_world_size()
-        self.handles.append(handle)
 
         
     def forward(self, *inputs, **kwargs):
