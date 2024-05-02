@@ -4,7 +4,7 @@ import torch.distributed as dist
 
 class My_DDP(nn.Module):
     def __init__(self, module: torch.nn.Module):
-        super(My_DDP, self)._init_()
+        super(My_DDP, self).__init__()
         self.module = module
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
