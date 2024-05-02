@@ -7,7 +7,7 @@ import torch
 import sys
 sys.path.insert(0, './cs336-systems/cs336_systems')
 from triton_rmsnorm import rms_norm_pytorch, rms_norm_triton, rmsnorm_jvp_g, rmsnorm_jvp_x
-from ddp_overlap_individual import My_DDP
+from ddp_overlap_individual import My_DDP, My_DDP_Bucket
 
 def get_rmsnorm_autograd_function_pytorch() -> Type:
     """
@@ -136,7 +136,7 @@ def get_ddp_bucketed(module: torch.nn.Module, bucket_size_mb: float) -> torch.nn
     Returns:
         Instance of a DDP class.
     """
-    raise NotImplementedError
+    return My_DDP_Bucket(module, bucket_size_mb)
 
 
 def ddp_bucketed_on_after_backward(
@@ -153,7 +153,7 @@ def ddp_bucketed_on_after_backward(
             Optimizer being used with the DDP-wrapped model.
     """
     # For example: ddp_model.finish_gradient_synchronization()
-    raise NotImplementedError
+    ddp_model.finish_gradient_synchronization()
 
 
 def ddp_bucketed_on_train_batch_start(
@@ -168,7 +168,7 @@ def ddp_bucketed_on_train_batch_start(
         optimizer: torch.optim.Optimizer
             Optimizer being used with the DDP-wrapped model.
     """
-    raise NotImplementedError
+    return ddp_model.start_gradient_synchronization_on_batch_start()
 
 
 def get_sharded_optimizer(
