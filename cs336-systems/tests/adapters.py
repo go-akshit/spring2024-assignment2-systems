@@ -7,6 +7,7 @@ import torch
 import sys
 sys.path.insert(0, './cs336-systems/cs336_systems')
 from triton_rmsnorm import rms_norm_pytorch, rms_norm_triton, rmsnorm_jvp_g, rmsnorm_jvp_x
+from ddp_overlap_individual import My_DDP
 
 def get_rmsnorm_autograd_function_pytorch() -> Type:
     """
@@ -97,7 +98,7 @@ def get_ddp_individual_parameters(module: torch.nn.Module) -> torch.nn.Module:
         Instance of a DDP class.
     """
     # For example: return DDPIndividualParameters(module)
-    raise NotImplementedError
+    return My_DDP(module)
 
 
 def ddp_individual_parameters_on_after_backward(
