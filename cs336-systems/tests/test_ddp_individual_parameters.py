@@ -76,9 +76,13 @@ def _test_DistributedDataParallelIndividualParameters(
         if rank == 0 or is_no_grad_fixed_param:
             assert torch.allclose(non_parallel_model_parameter, ddp_model_parameter)
         else:
+<<<<<<< HEAD
             assert not torch.allclose(
                 non_parallel_model_parameter, ddp_model_parameter
             )
+=======
+            assert not torch.allclose(non_parallel_model_parameter, ddp_model_parameter)
+>>>>>>> upstream/master
 
     # Make sure all the ranks have the same model state
     validate_ddp_net_equivalence(ddp_model)
@@ -116,10 +120,49 @@ def _test_DistributedDataParallelIndividualParameters(
         # At this point, the parameters of non-parallel model should differ
         # from the parameters of the DDP model (since we've applied the
         # gradient step to the non-parallel model, but not to the DDP model).
+<<<<<<< HEAD
+=======
         if rank == 0:
             for non_parallel_model_parameter, ddp_model_parameter in zip(
                 non_parallel_model.parameters(), ddp_model.parameters()
             ):
+                if (
+                    non_parallel_model_parameter.requires_grad
+                    and ddp_model_parameter.requires_grad
+                ):
+                    # The only parameters that change are those that require_grad
+                    assert not torch.allclose(
+                        non_parallel_model_parameter, ddp_model_parameter
+                    )
+                else:
+                    # parameters that don't require_grad shouldn't change
+                    assert torch.allclose(
+                        non_parallel_model_parameter, ddp_model_parameter
+                    )
+
+        # While the non-parallel model does a forward pass on all the data (20 examples),
+        # each DDP rank only sees 10 (disjoint) examples.
+        # However, the end result should be the same as doing a forward pass on all 20 examples.
+        offset = rank * local_bs
+        ddp_data = all_x[offset : offset + local_bs, :].to(device)
+        ddp_labels = all_y[offset : offset + local_bs, :].to(device)
+        ddp_outputs = ddp_model(ddp_data)
+        ddp_loss = loss_fn(ddp_outputs, ddp_labels)
+        ddp_loss.backward()
+
+        # Run student-written code that needs to execute after the backward pass,
+        # but before the optimizer step (e.g., to wait for all DDP ranks to sync gradients)
+        ddp_individual_parameters_on_after_backward(ddp_model, ddp_optimizer)
+
+        ddp_optimizer.step()
+
+        # At this point, the non-parallel model should exactly match the parameters of the DDP model
+>>>>>>> upstream/master
+        if rank == 0:
+            for non_parallel_model_parameter, ddp_model_parameter in zip(
+                non_parallel_model.parameters(), ddp_model.parameters()
+            ):
+<<<<<<< HEAD
                 if (
                     non_parallel_model_parameter.requires_grad
                     and ddp_model_parameter.requires_grad
@@ -158,6 +201,9 @@ def _test_DistributedDataParallelIndividualParameters(
                 assert torch.allclose(
                     non_parallel_model_parameter, ddp_model_parameter
                 )
+=======
+                assert torch.allclose(non_parallel_model_parameter, ddp_model_parameter)
+>>>>>>> upstream/master
 
         # Shuffle the data so that during the next iteration, each DDP rank sees a different set of inputs.
         # We make sure to use the same seed when shuffling (else the per-rank examples might not be disjoint).
