@@ -19,7 +19,8 @@ class My_DDP(nn.Module):
                 
     
     def hook_func(self, param):
-        handle = dist.all_reduce(tensor=param.grad, op=dist.ReduceOp.AVG, async_op=True)
+        handle = dist.all_reduce(tensor=param.grad.data, op=dist.ReduceOp.SUM, async_op=True)
+        param.grad.data /= dist.get_world_size()
         self.handles.append(handle)
 
         
