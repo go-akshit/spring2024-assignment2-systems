@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.distributed as dist
 
 class My_DDP(nn.Module):
-    def _init_(self, module: torch.nn.Module):
+    def __init__(self, module: torch.nn.Module):
         super(My_DDP, self)._init_()
         self.module = module
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -34,7 +34,7 @@ class My_DDP(nn.Module):
         dist.all_reduce(param.grad.data, op=dist.ReduceOp.SUM, async_op=async_op)
 
 
-    def _del_(self):
+    def __del__(self):
         for hook in self._hooks:
             hook.remove()
         dist.destroy_process_group()
