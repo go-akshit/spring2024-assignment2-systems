@@ -54,9 +54,9 @@ class My_DDP_Bucket(nn.Module):
             dist.broadcast(param.data, src=0, async_op=False)
 
         # Add parameters to buckets
-        for param in self.module.parameters():
+        for i, param in enumerate(self.module.parameters()):
             if param.requires_grad:
-                self.add_param_to_bucket(param)
+                self.add_param_to_bucket(param, i)
 
         # Add any remaining parameters in the current bucket to the buckets list
         if self.current_bucket:
@@ -71,22 +71,22 @@ class My_DDP_Bucket(nn.Module):
         self.param_to_idx = {}
 
 
-    def add_param_to_bucket(self, param):
+    def add_param_to_bucket(self, param, i):
         param_size = param.data.numel() * param.data.element_size()
-        if self.current_bucket_size + param_size > self.bucket_size_mb:
+        if self.current_bucket_size > self.bucket_size_mb:
             self.buckets.append(self.current_bucket)
             self.current_bucket = []
             self.current_bucket_size = 0
         self.current_bucket.append(param)
-        self.param_to_idx[param.__hash__()] = len(self.buckets)
+        self.param_to_idx[i] = len(self.buckets)
         self.current_bucket_size += param_size
-        hook = param.register_post_accumulate_grad_hook(self.hook_func)
+        hook = param.register_post_accumulate_grad_hook(lambda p, idx=i: self.hook_func(p, idx))
         self.hooks.append(hook)
 
-    def hook_func(self, param):
+    def hook_func(self, param, i):
         if param.grad is not None:
             param.grad.data /= dist.get_world_size()
-        if all(hasattr(p, 'grad') and p.grad is not None for p in self.buckets[self.param_to_idx[param.__hash__()]]):
+        if all(hasattr(p, 'grad') and p.grad is not None for p in self.buckets[self.param_to_idx[i]]):
             self.all_reduce_bucket(self.current_bucket)
 
     def all_reduce_bucket(self, bucket):
