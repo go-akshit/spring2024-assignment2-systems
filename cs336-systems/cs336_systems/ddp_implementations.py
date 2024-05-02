@@ -110,17 +110,54 @@ class My_DDP_Bucket(nn.Module):
             hook.remove()
         dist.destroy_process_group()
 
-class My_DDP_Opt(optim.Optimizer):
+# class My_DDP_Opt(optim.Optimizer):
 
-    def __init__(self, params, optimizer_cls, **kwargs):
-        self.optimizer = optimizer_cls
+#     def __init__(self, params, optimizer_cls, **kwargs):
+#         self.optimizer = optimizer_cls
+#         self.rank = dist.get_rank()
+#         self.world_size = dist.get_world_size()
+#         self.kwargs = kwargs
+#         super(My_DDP_Opt, self).__init__(params, kwargs)
+        
+#     def step(self, closure=None, **kwargs):
+#         self.optimizer_cls.step(closure, **kwargs)
+#         for group in self.param_groups:
+#             for i, param in enumerate(group['params']):
+#                 dist.broadcast(param.data, src=self._get_rank(i))
+#         dist.barrier()
+
+#     def _get_rank(self, idx):
+#         return idx % self.world_size
+
+#     def add_param_group(self, param_group):
+#         param_shrd = {}
+#         for key in param_group.keys():
+#             if key != 'params':
+#                 param_shrd[key] = param_group[key]
+#         param_shrd = deepcopy(param_shrd)
+#         param_shrd['params'] = param_group['params']
+#         if self.optimizer is None:
+#             self.optimizer = self.optimizer_cls([param_shrd], **self.kwargs)
+#         else:
+#             self.optimizer.add_param_group(param_shrd)
+#         super().add_param_group(param_group)\
+#         import torch.distributed as dist
+# import torch
+# from copy import deepcopy
+
+class My_DDP_Opt(torch.optim.Optimizer):
+
+    def _init_(self, params, optimizer_cls, **kwargs):
         self.rank = dist.get_rank()
         self.world_size = dist.get_world_size()
+        self.optimizer = None
         self.kwargs = kwargs
-        super(My_DDP_Opt, self).__init__(params, kwargs)
-        
+        self.optimizer_cls = optimizer_cls
+        self.params_rank = {}
+        super(My_DDP_Opt, self)._init_(params, kwargs)
+
     def step(self, closure=None, **kwargs):
-        self.optimizer_cls.step(closure, **kwargs)
+        self.optimizer.step(closure, **kwargs)
         for group in self.param_groups:
             for i, param in enumerate(group['params']):
                 dist.broadcast(param.data, src=self._get_rank(i))
@@ -135,7 +172,7 @@ class My_DDP_Opt(optim.Optimizer):
             if key != 'params':
                 param_shrd[key] = param_group[key]
         param_shrd = deepcopy(param_shrd)
-        param_shrd['params'] = param_group['params']
+        param_shrd['params'] = param_group['params'][self.rank::self.world_size]
         if self.optimizer is None:
             self.optimizer = self.optimizer_cls([param_shrd], **self.kwargs)
         else:
