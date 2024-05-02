@@ -147,14 +147,14 @@ class My_DDP_Bucket(nn.Module):
 
 class My_DDP_Opt(torch.optim.Optimizer):
 
-    def _init_(self, params, optimizer_cls, **kwargs):
+    def __init__(self, params, optimizer_cls, **kwargs):
         self.rank = dist.get_rank()
         self.world_size = dist.get_world_size()
         self.optimizer = None
         self.kwargs = kwargs
         self.optimizer_cls = optimizer_cls
         self.params_rank = {}
-        super(My_DDP_Opt, self)._init_(params, kwargs)
+        super(My_DDP_Opt, self).__init__(params, kwargs)
 
     def step(self, closure=None, **kwargs):
         self.optimizer.step(closure, **kwargs)
