@@ -68,7 +68,7 @@ class My_DDP_Bucket(nn.Module):
         self.handles = []
         self.hooks = []
 
-        
+
     def add_param_to_bucket(self, param):
         param_size = param.data.numel() * param.data.element_size()
         if self.current_bucket_size + param_size > self.bucket_size_mb:
@@ -81,7 +81,8 @@ class My_DDP_Bucket(nn.Module):
         self.hooks.append(hook)
 
     def hook_func(self, param):
-        param.grad.data /= dist.get_world_size()
+        if param.grad is not None:
+            param.grad.data /= dist.get_world_size()
         if all(hasattr(p, 'grad') and p.grad is not None for p in self.current_bucket):
             self.all_reduce_bucket(self.current_bucket)
 
