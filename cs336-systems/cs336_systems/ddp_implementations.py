@@ -113,12 +113,11 @@ class My_DDP_Bucket(nn.Module):
 class My_DDP_Opt(optim.Optimizer):
 
     def __init__(self, params, optimizer_cls, **kwargs):
-        super(My_DDP_Opt, self).__init__(params, kwargs)
         self.optimizer_cls = optimizer_cls
         self.rank = dist.get_rank()
         self.world_size = dist.get_world_size()
-        self.optimizer = None
         self.kwargs = kwargs
+        super(My_DDP_Opt, self).__init__(params, kwargs)
         
     def step(self, closure=None, **kwargs):
         self.optimizer_cls.step(closure, **kwargs)
@@ -136,7 +135,7 @@ class My_DDP_Opt(optim.Optimizer):
             if key != 'params':
                 param_shrd[key] = param_group[key]
         param_shrd = deepcopy(param_shrd)
-        param_shrd['params'] = param_group['params'][self.rank::self.world_size]
+        param_shrd['params'] = [param for i, param in enumerate(param_group['params']) if i % self.world_size == self.rank]
         if self.optimizer is None:
             self.optimizer = self.optimizer_cls([param_shrd], **self.kwargs)
         else:
