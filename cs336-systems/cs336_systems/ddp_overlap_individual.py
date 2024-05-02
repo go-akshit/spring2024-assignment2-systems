@@ -22,9 +22,10 @@ class My_DDP(nn.Module):
                 
     
     def hook_func(self, param):
-        dist.all_reduce(tensor=param.grad.data, op=dist.ReduceOp.SUM, async_op=True)
         param.grad.data /= dist.get_world_size()
+        dist.all_reduce(param.grad.data, op=dist.ReduceOp.SUM, async_op=True)
 
+    
         
     def forward(self, *inputs, **kwargs):
         return self.module(*inputs, **kwargs)
@@ -33,4 +34,6 @@ class My_DDP(nn.Module):
         dist.barrier()
 
     def _del_(self):
+        for hook in self.all_hooks:
+            hook.remove()
         dist.destroy_process_group()
