@@ -135,7 +135,7 @@ class My_DDP_Opt(optim.Optimizer):
             if key != 'params':
                 param_shrd[key] = param_group[key]
         param_shrd = deepcopy(param_shrd)
-        param_shrd['params'] = [param for i, param in enumerate(param_group['params']) if i % self.world_size == self.rank]
+        param_shrd['params'] = param_group['params']
         if self.optimizer is None:
             self.optimizer = self.optimizer_cls([param_shrd], **self.kwargs)
         else:
