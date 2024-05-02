@@ -110,19 +110,18 @@ class My_DDP_Bucket(nn.Module):
             hook.remove()
         dist.destroy_process_group()
 
-class OptimizerSharded(optim.Optimizer):
+class My_DDP_Opt(optim.Optimizer):
 
     def __init__(self, params, optimizer_cls, **kwargs):
+        super(My_DDP_Opt, self).__init__(params, kwargs)
+        self.optimizer_cls = optimizer_cls
         self.rank = dist.get_rank()
         self.world_size = dist.get_world_size()
         self.optimizer = None
         self.kwargs = kwargs
-        self.optimizer_cls = optimizer_cls
-        self.params_rank = {}
-        super(OptimizerSharded, self).__init__(params, kwargs)
-
+        
     def step(self, closure=None, **kwargs):
-        self.optimizer.step(closure, **kwargs)
+        self.optimizer_cls.step(closure, **kwargs)
         for group in self.param_groups:
             for i, param in enumerate(group['params']):
                 dist.broadcast(param.data, src=self._get_rank(i))

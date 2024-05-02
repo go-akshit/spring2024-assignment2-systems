@@ -7,7 +7,7 @@ import torch
 import sys
 sys.path.insert(0, './cs336-systems/cs336_systems')
 from triton_rmsnorm import rms_norm_pytorch, rms_norm_triton, rmsnorm_jvp_g, rmsnorm_jvp_x
-from ddp_implementations import My_DDP, My_DDP_Bucket, OptimizerSharded
+from ddp_implementations import My_DDP, My_DDP_Bucket, My_DDP_Opt
 
 def get_rmsnorm_autograd_function_pytorch() -> Type:
     """
@@ -189,4 +189,4 @@ def get_sharded_optimizer(
     Returns:
         Instance of sharded optimizer.
     """
-    return OptimizerSharded(params, optimizer_cls, **kwargs)
+    return My_DDP_Opt(params, optimizer_cls, **kwargs)
