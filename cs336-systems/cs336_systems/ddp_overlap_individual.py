@@ -57,7 +57,9 @@ class My_DDP_Bucket(nn.Module):
         for i, param in enumerate(self.module.parameters()):
             if param.requires_grad:
                 self.add_param_to_bucket(param, i)
-
+        if dist.get_rank() == 0:
+            print(f"{self.param_to_idx = }")
+            print(f"{len(self.buckets) = }")
         # Add any remaining parameters in the current bucket to the buckets list
         if self.current_bucket:
             self.buckets.append(self.current_bucket)

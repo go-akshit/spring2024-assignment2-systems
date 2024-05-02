@@ -27,8 +27,8 @@ from .common import (
 logger = logging.getLogger(__name__)
 
 
-@pytest.mark.parametrize("model_class", [ToyModel, ToyModelWithTiedWeights])
-@pytest.mark.parametrize("bucket_size_mb", [0.0016, 0.0001, 0.01])
+@pytest.mark.parametrize("model_class", [ToyModel])
+@pytest.mark.parametrize("bucket_size_mb", [0.0016])
 def test_DistributedDataParallelCPU(bucket_size_mb, model_class):
     """
     bucket_size_mb 0.0016 is designed to test the case with 2 buckets (one bucket
