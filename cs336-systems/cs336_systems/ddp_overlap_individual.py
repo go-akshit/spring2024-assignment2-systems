@@ -28,8 +28,7 @@ class My_DDP(nn.Module):
         return self.module(*inputs, **kwargs)
     
     def finish_gradient_synchronization(self):
-        for handle in self.handles:
-            handle.wait()
+        dist.barrier()
 
     def _del_(self):
         dist.destroy_process_group()
