@@ -176,6 +176,8 @@ def _test_DistributedDataParallelCPU(
             for non_parallel_model_parameter, ddp_model_parameter in zip(
                 non_parallel_model.parameters(), ddp_model.parameters()
             ):
+                print(f"non_parallel_model_parameter = {non_parallel_model_parameter}")
+                print(f"ddp_model_parameter = {ddp_model_parameter}")
                 assert torch.allclose(
                     non_parallel_model_parameter, ddp_model_parameter
                 )
