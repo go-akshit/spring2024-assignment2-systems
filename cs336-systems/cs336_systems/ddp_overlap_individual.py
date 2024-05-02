@@ -6,6 +6,8 @@ class My_DDP(nn.Module):
     def __init__(self, module):
         super(My_DDP, self).__init__()
         self.module = module
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
         self.handles = []
         self.all_hooks = []
         # Broadcast module's initial parameters to all workers
@@ -14,9 +16,8 @@ class My_DDP(nn.Module):
         
         # Register hook to synchronize gradients
         for param in self.module.parameters():
-            if param.requires_grad:
-                hook = param.register_post_accumulate_grad_hook(self.hook_func)
-                self.all_hooks.append(hook)
+            hook = param.register_post_accumulate_grad_hook(self.hook_func)
+            self.all_hooks.append(hook)
 
                 
     
