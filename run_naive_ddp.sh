@@ -3,7 +3,7 @@
 #SBATCH --cpus-per-task=2
 #SBATCH --ntasks-per-node=2
 #SBATCH --gpus-per-node=2
-#SBATCH --nodes=2
+#SBATCH --nodes=1
 #SBATCH --mem=8G
 #SBATCH --time=00:05:00
 #SBATCH --partition=a2

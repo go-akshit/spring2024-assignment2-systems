@@ -16,8 +16,8 @@ from cs336_basics.optimizer import AdamW
 class _FC2(nn.Module):
     def __init__(self):
         super().__init__()
-        self.fc = nn.Linear(10, 5, bias=True)
-        self.fc.bias.requires_grad = False
+        self.fc = nn.Linear(10, 50, bias=False)
+        #self.fc.bias.requires_grad = False
 
     def forward(self, x):
         x = self.fc(x)
@@ -27,18 +27,18 @@ class _FC2(nn.Module):
 class ToyModel(nn.Module):
     def __init__(self):
         super().__init__()
-        self.fc1 = nn.Linear(10, 10, bias=False)
-        self.fc2 = _FC2()
-        self.fc3 = nn.Linear(5, 5, bias=False)
+        self.fc1 = nn.Linear(10, 5, bias=False)
+        #self.fc2 = _FC2()
+        #self.fc3 = nn.Linear(50, 5, bias=False)
         self.relu = nn.ReLU()
-        self.no_grad_fixed_param = nn.Parameter(
-            torch.tensor([2.0, 2.0]), requires_grad=False
-        )
+        #self.no_grad_fixed_param = nn.Parameter(
+        #    torch.tensor([2.0, 2.0]), requires_grad=False
+        #)
 
     def forward(self, x):
         x = self.relu(self.fc1(x))
-        x = self.relu(self.fc2(x))
-        x = self.fc3(x)
+        #x = self.relu(self.fc2(x))
+        #x = self.fc3(x)
         return x
 
 def get_args():
@@ -86,7 +86,12 @@ def run(args, model, optimizer, num_iterations, inputs, target):
         optimizer.zero_grad()
         x = inputs
         logits = model(x)
-        loss = utils.cross_entropy(logits, target)
+        #loss = utils.cross_entropy(logits, target)
+        print("shape")
+        print(logits)
+        print(target)
+        loss_fn = nn.MSELoss()
+        loss = loss_fn(logits, target)
         loss.backward()
         i = 1
         for param in model.parameters():
@@ -103,7 +108,9 @@ def run_individual(args, model, optimizer, num_iterations, inputs, target):
         optimizer.zero_grad()
         x = inputs
         logits = model(x)
-        loss = utils.cross_entropy(logits, target)
+        #loss = utils.cross_entropy(logits, target)
+        loss_fn = nn.MSELoss()
+        loss = loss_fn(logits, target)
         loss.backward()        
         optimizer.step()
 
@@ -131,7 +138,9 @@ def get_model_optimizer_input_target(args, device):
     input = torch.load("ddp_test_data.pt")
     # Shape: (20, 5)
     target = torch.load("ddp_test_labels.pt")
-    
+    #print(f"{input =}, {target =}")
+    input = input.to(device)
+    target = target.to(device)
     return input, target, model
 
 def broadcast_parameters(args, model):
@@ -164,14 +173,18 @@ def ddp(args):
     end_index = int(start_index + sharded_batch_size)
     sharded_input = input_a[start_index: end_index]
     sharded_target = target[start_index: end_index]
-    #print(f"input = {input_a.cpu().tolist()}") 
-    #print(f"target = {target.cpu().tolist()}")
+    print(f"input = {[i for i in input_a.cpu().tolist()]}") 
+    print(f"{input.shape}")
+    print(f"target = {[i for i in target.cpu().tolist()]}")
+    print(f"{target.shape}")
     if(args.device == 'gpu'):
         sharded_input = sharded_input.to(device)
         sharded_target = sharded_target.to(device)
         model = model.to(device)
-    #print(f"sharded_input {rank} = {sharded_input.cpu().tolist()}")
-    #print(f"sharded_target {rank} = {sharded_target.cpu().tolist()}")
+    print(f"sharded_input {rank} = {[i for i in sharded_input.cpu().tolist()]}")
+    print(f"{sharded_input.shape}")
+    print(f"sharded_target {rank} = {[i for i in sharded_target.cpu().tolist()]}")
+    print(f"{sharded_target.shape}")
     #print(f"parameter before broadcast {rank} = {next(model.parameters())}")
     broadcast_parameters(args, model)
     #print(f"parameter after broadcast {rank} = {next(model.parameters())}")
@@ -192,12 +205,13 @@ def ddp(args):
             if(non_parallel_model_parameter.requires_grad and ddp_model_parameter.requires_grad):
                 
                 # The only parameters that change are those that require_grad
-                #try:
-                assert torch.allclose(non_parallel_model_parameter, ddp_model_parameter)
-                    #print('assertion_passed')
-                #except AssertionError as error:
-                    #print(non_parallel_model_parameter)
-                    #print(ddp_model_parameter)
+                try:
+                    assert torch.allclose(non_parallel_model_parameter, ddp_model_parameter)
+                    print('assertion_passed')
+                except AssertionError as error:
+                    print(" ")
+                    print(non_parallel_model_parameter.cpu().tolist())
+                    print(ddp_model_parameter.cpu().tolist())
             else:
                 # parameters that don't require_grad shouldn't change
                 assert torch.allclose(non_parallel_model_parameter, ddp_model_parameter)
