@@ -3,17 +3,17 @@ import torch.nn as nn
 import torch.distributed as dist
 
 class My_DDP(nn.Module):
-    def __init__(self, model):
+    def __init__(self, module):
         super(My_DDP, self).__init__()
-        self.model = model
+        self.module = module
         self.handles = []
 
-        # Broadcast model's initial parameters to all workers
-        for param in self.model.parameters():
+        # Broadcast module's initial parameters to all workers
+        for param in self.module.parameters():
             dist.broadcast(param.data, src=0)
         
         # Register hook to synchronize gradients
-        for param in self.model.parameters():
+        for param in self.module.parameters():
             if param.requires_grad:
                 param.register_post_accumulate_grad_hook(self.hook_func)
                 
@@ -24,9 +24,9 @@ class My_DDP(nn.Module):
 
         
     def forward(self, *inputs, **kwargs):
-        return self.model(*inputs, **kwargs)
+        return self.module(*inputs, **kwargs)
     
     def finish_gradient_synchronization(self):
         for handle in self.handles:
             handle.wait()
-            
+
