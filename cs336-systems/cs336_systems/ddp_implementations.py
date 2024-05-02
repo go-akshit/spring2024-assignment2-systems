@@ -110,42 +110,8 @@ class My_DDP_Bucket(nn.Module):
             hook.remove()
         dist.destroy_process_group()
 
-# class My_DDP_Opt(optim.Optimizer):
 
-#     def __init__(self, params, optimizer_cls, **kwargs):
-#         self.optimizer = optimizer_cls
-#         self.rank = dist.get_rank()
-#         self.world_size = dist.get_world_size()
-#         self.kwargs = kwargs
-#         super(My_DDP_Opt, self).__init__(params, kwargs)
-        
-#     def step(self, closure=None, **kwargs):
-#         self.optimizer_cls.step(closure, **kwargs)
-#         for group in self.param_groups:
-#             for i, param in enumerate(group['params']):
-#                 dist.broadcast(param.data, src=self._get_rank(i))
-#         dist.barrier()
-
-#     def _get_rank(self, idx):
-#         return idx % self.world_size
-
-#     def add_param_group(self, param_group):
-#         param_shrd = {}
-#         for key in param_group.keys():
-#             if key != 'params':
-#                 param_shrd[key] = param_group[key]
-#         param_shrd = deepcopy(param_shrd)
-#         param_shrd['params'] = param_group['params']
-#         if self.optimizer is None:
-#             self.optimizer = self.optimizer_cls([param_shrd], **self.kwargs)
-#         else:
-#             self.optimizer.add_param_group(param_shrd)
-#         super().add_param_group(param_group)\
-#         import torch.distributed as dist
-# import torch
-# from copy import deepcopy
-
-class My_DDP_Opt(torch.optim.Optimizer):
+class My_DDP_Opt(optim.Optimizer):
 
     def __init__(self, params, optimizer_cls, **kwargs):
         self.optimizer_cls = optimizer_cls
@@ -166,11 +132,10 @@ class My_DDP_Opt(torch.optim.Optimizer):
 
     def add_param_group(self, param_group):
         param_rank = {key: param_group[key] for key in param_group.keys() if key != 'params'}
-        #param_rank[key] = param_group[key] if key != 'params' for key in param_group.keys()
-        # param_rank = deepcopy(param_rank)
         param_rank['params'] = [param for i, param in enumerate(param_group['params']) if i % self.world_size == self.rank]
+        
         if self.optimizer_per_rank is None:
             self.optimizer_per_rank = self.optimizer_cls([param_rank], **self.kwargs)
         else:
             self.optimizer_per_rank.add_param_group(param_rank)
-        super().add_param_group(param_group)
+        #super().add_param_group(param_group)
