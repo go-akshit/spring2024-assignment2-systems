@@ -113,7 +113,7 @@ class My_DDP_Bucket(nn.Module):
 class My_DDP_Opt(optim.Optimizer):
 
     def __init__(self, params, optimizer_cls, **kwargs):
-        self.optimizer_cls = optimizer_cls
+        self.optimizer = optimizer_cls
         self.rank = dist.get_rank()
         self.world_size = dist.get_world_size()
         self.kwargs = kwargs
