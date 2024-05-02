@@ -3,31 +3,39 @@ import torch.nn as nn
 import torch.distributed as dist
 
 class My_DDP(nn.Module):
-    def __init__(self, module):
-        super(My_DDP, self).__init__()
+    def _init_(self, module: torch.nn.Module):
+        super(My_DDP, self)._init_()
         self.module = module
-        self.handles = []
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-        # Broadcast module's initial parameters to all workers
-        for param in self.module.parameters():
-            dist.broadcast(param.data, src=0)
-        
-        # Register hook to synchronize gradients
+        # Broadcast model parameters
+        self._broadcast_parameters()
+
+        # Register gradient synchronization hook
+        self._hooks = []
         for param in self.module.parameters():
             if param.requires_grad:
-                param.register_post_accumulate_grad_hook(self.hook_func)
-                
-    
-    def hook_func(self, param):
-        handle = dist.all_reduce(tensor=param.grad.data, op=dist.ReduceOp.SUM, async_op=True)
-        param.grad.data /= dist.get_world_size()
-        self.handles.append(handle)
+                hook = param.register_post_accumulate_grad_hook(self._synchronize_gradients)
+                self._hooks.append(hook)
 
-        
     def forward(self, *inputs, **kwargs):
         return self.module(*inputs, **kwargs)
-    
+
     def finish_gradient_synchronization(self):
-        for handle in self.handles:
-            handle.wait()
+        # Synchronize gradients across all processes
+        dist.barrier()
+
+    def _broadcast_parameters(self, async_op=False):
+        for param in self.module.parameters():
+            dist.broadcast(param.data, 0, async_op=async_op)
+
+    def _synchronize_gradients(self, param, async_op=True):
+        param.grad.data /= dist.get_world_size()
+        dist.all_reduce(param.grad.data, op=dist.ReduceOp.SUM, async_op=async_op)
+
+
+    def _del_(self):
+        for hook in self._hooks:
+            hook.remove()
+        dist.destroy_process_group()
 
